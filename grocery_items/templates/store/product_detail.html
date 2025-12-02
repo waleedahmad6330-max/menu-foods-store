@@ -1,0 +1,70 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    .product-container { padding: 60px 0; background-color: #fff; }
+    .image-card { border-radius: 20px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; background: #fff; position: relative; cursor: zoom-in; transition: transform 0.3s ease; }
+    .image-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(0, 104, 55, 0.1); }
+    .product-img { width: 100%; height: 500px; object-fit: contain; padding: 20px; }
+    .zoom-hint { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 50%; box-shadow: 0 5px 15px rgba(0,0,0,0.1); color: #006837; opacity: 0; transition: 0.3s; }
+    .image-card:hover .zoom-hint { opacity: 1; }
+    .category-badge { background-color: #f0fdf4; color: #006837; padding: 5px 15px; border-radius: 30px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 15px; }
+    .product-title { font-weight: 800; font-size: 2.5rem; color: #222; margin-bottom: 10px; line-height: 1.2; }
+    .product-price { font-size: 2rem; color: #006837; font-weight: 700; margin-bottom: 20px; }
+    .product-desc { color: #666; font-size: 1rem; line-height: 1.7; margin-bottom: 30px; }
+    .btn-add-aesthetic { background: linear-gradient(135deg, #006837 0%, #004d29 100%); color: white; border: none; padding: 18px 40px; border-radius: 50px; font-weight: 700; font-size: 1.1rem; transition: 0.3s; box-shadow: 0 10px 25px rgba(0, 104, 55, 0.25); width: 100%; text-transform: uppercase; letter-spacing: 0.5px; }
+    .btn-add-aesthetic:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0, 104, 55, 0.35); color: white; }
+    .feature-box { text-align: center; padding: 15px; border: 1px solid #eee; border-radius: 12px; background-color: #fcfcfc; }
+    .feature-icon { font-size: 1.5rem; color: #006837; margin-bottom: 8px; }
+    .feature-text { font-size: 0.75rem; font-weight: 600; color: #555; text-transform: uppercase; }
+</style>
+
+<div class="product-container">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item active text-dark fw-bold" aria-current="page">Product Details</li>
+            </ol>
+        </nav>
+
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-6">
+                <div class="image-card" id="product-gallery">
+                    <div class="zoom-hint"><i class="fas fa-search-plus"></i></div>
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-img">
+                    {% else %}
+                        <img src="https://via.placeholder.com/600x600?text=No+Image" alt="No Image" class="product-img">
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="ps-lg-4">
+                    <div class="category-badge">{{ product.category.name|default:"General" }}</div>
+                    <h1 class="product-title">{{ product.name }}</h1>
+                    
+                    
+                    <div class="product-price">Rs. {{ product.price|floatformat:0 }}</div>
+
+                    <p class="product-desc">{{ product.description|default:"Experience the fresh and premium taste of Menu Foods." }}</p>
+
+                    <form action="{% url 'add_to_cart' product.id %}" method="POST" class="mb-5">
+                        {% csrf_token %}
+                        <div class="d-flex align-items-center">
+                            <button type="submit" class="btn-add-aesthetic"><i class="fas fa-shopping-basket me-2"></i> Add to Cart</button>
+                        </div>
+                    </form>
+
+                    <div class="row g-3">
+                        <div class="col-4"><div class="feature-box"><div class="feature-icon"><i class="fas fa-truck-fast"></i></div><div class="feature-text">Fast Delivery</div></div></div>
+                        <div class="col-4"><div class="feature-box"><div class="feature-icon"><i class="fas fa-check-circle"></i></div><div class="feature-text">100% Halal</div></div></div>
+                        <div class="col-4"><div class="feature-box"><div class="feature-icon"><i class="fas fa-snowflake"></i></div><div class="feature-text">Keep Frozen</div></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

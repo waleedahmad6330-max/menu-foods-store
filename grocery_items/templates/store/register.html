@@ -1,0 +1,156 @@
+{% extends 'store/base.html' %}
+{% load socialaccount %}
+
+{% block content %}
+<style>
+    /* Card Styling */
+    .auth-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    
+    /* Header Styling */
+    .auth-header {
+        background-color: #fff;
+        border-bottom: 1px solid #f0f0f0;
+        padding: 30px;
+        text-align: center;
+    }
+
+    /* Input Field Styling (Enforced for Django Forms) */
+    form input[type="text"],
+    form input[type="email"],
+    form input[type="password"],
+    form input[type="tel"] {
+        background-color: #fcfcfc;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 14px 18px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        width: 100%; /* Force full width */
+        color: #333;
+    }
+    
+    form input:focus {
+        background-color: #fff;
+        border-color: #006837;
+        box-shadow: 0 0 0 4px rgba(0, 104, 55, 0.1);
+        outline: none;
+    }
+
+    /* Button Styling */
+    .btn-create {
+        background: linear-gradient(135deg, #006837 0%, #004d29 100%);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 50px;
+        width: 100%;
+        font-weight: 700;
+        letter-spacing: 1px;
+        transition: 0.3s;
+        margin-top: 10px;
+    }
+    .btn-create:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 104, 55, 0.3);
+        color: white;
+    }
+
+    /* Google Button Styling */
+    .google-btn {
+        border: 1px solid #eee;
+        background-color: #fff;
+        color: #444;
+        font-weight: 600;
+        padding: 12px;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.3s;
+        width: 100%;
+        text-decoration: none;
+    }
+    .google-btn:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        border-color: #ddd;
+        color: #222;
+    }
+    
+    /* Divider Styling */
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 25px 0;
+        color: #999;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+    }
+    .divider::before, .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #eee;
+    }
+    .divider:not(:empty)::before { margin-right: 1em; }
+    .divider:not(:empty)::after { margin-left: 1em; }
+</style>
+
+<div class="container py-5" style="min-height: 85vh; display: flex; align-items: center;">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-6 col-lg-5">
+            <div class="card auth-card">
+                
+                <!-- Header -->
+                <div class="auth-header">
+                    <h3 class="fw-bold text-success mb-1">Create Account</h3>
+                    <p class="text-muted small mb-0">Start your journey with Menu Foods</p>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    
+                    <!-- 1. MANUAL FORM -->
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        {% for field in form %}
+                        <div class="mb-3">
+                            <label class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 0.75rem;">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="text-danger small mt-1 ms-1"><i class="fas fa-exclamation-circle me-1"></i> {{ field.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                        <button type="submit" class="btn-create shadow">
+                            CREATE ACCOUNT
+                        </button>
+                    </form>
+
+                    <!-- 2. AESTHETIC DIVIDER -->
+                    <div class="divider">OR CONTINUE WITH</div>
+
+                    <!-- 3. GOOGLE BUTTON -->
+                    <a href="{% provider_login_url 'google' %}" class="btn google-btn">
+                        <img src="https://img.icons8.com/color/24/000000/google-logo.png" class="me-3" alt="Google"> 
+                        Google Account
+                    </a>
+
+                    <!-- Footer Link -->
+                    <div class="text-center mt-4 pt-2">
+                        <p class="small text-muted mb-0">Already a member? <a href="{% url 'login' %}" class="fw-bold text-success text-decoration-none">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

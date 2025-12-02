@@ -1,0 +1,117 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Hero Section with Green Overlay */
+    .about-hero {
+        background: linear-gradient(rgba(0, 104, 55, 0.85), rgba(0, 104, 55, 0.7)), url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 80px 0;
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    
+    /* Feature Cards */
+    .feature-card {
+        border: none;
+        background: #fff;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
+        height: 100%;
+        text-align: center;
+    }
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    .icon-circle {
+        width: 70px;
+        height: 70px;
+        background-color: #f8f9fa;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        color: #006837; /* Menu Green */
+    }
+</style>
+
+<!-- Hero Section -->
+<div class="about-hero">
+    <div class="container">
+        <h1 class="display-4 fw-bold">From Our Farms to Your Fork</h1>
+        <p class="lead text-warning fw-bold">Serving Freshness & Quality Since 2010</p>
+    </div>
+</div>
+
+<!-- Main Story Section -->
+<div class="container mb-5">
+    <div class="row align-items-center">
+        <div class="col-md-6 mb-4 mb-md-0">
+            <h6 class="text-warning fw-bold text-uppercase">Who We Are</h6>
+            <h2 class="fw-bold mb-4" style="color: #006837;">Pakistan's Favorite Frozen Food Brand</h2>
+            <p class="text-muted">
+                Menu Foods started with a simple mission: to provide healthy, hygienic, and tasty food solutions for modern families. What began as a small initiative has now grown into a household name, trusted by mothers across the nation.
+            </p>
+            <p class="text-muted">
+                We take pride in our "Seed to Shelf" philosophy. We grow our own ingredients, process them in state-of-the-art facilities, and deliver them to you, ensuring that every bite is full of nutrition.
+            </p>
+        </div>
+        <div class="col-md-6">
+            <div class="position-relative">
+                <!-- Placeholder Image (Replace with a factory or food image) -->
+                <img src="https://images.unsplash.com/photo-1556910103-1c02745a30bf?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" class="img-fluid rounded shadow-lg" alt="Our Kitchen">
+                <div class="bg-warning text-dark p-3 rounded position-absolute shadow fw-bold" style="bottom: -20px; left: -20px;">
+                    <i class="fas fa-star me-1"></i> 10+ Years of Excellence
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Core Values Grid -->
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold" style="color: #006837;">Why Choose Menu?</h2>
+            <p class="text-muted">Our promise of quality in every pack.</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon-circle">
+                        <i class="fas fa-leaf fa-2x"></i>
+                    </div>
+                    <h5 class="fw-bold">100% Fresh Ingredients</h5>
+                    <p class="small text-muted mb-0">Sourced directly from our controlled farms to ensure the highest quality standards.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon-circle">
+                        <i class="fas fa-temperature-low fa-2x"></i>
+                    </div>
+                    <h5 class="fw-bold">IQF Technology</h5>
+                    <p class="small text-muted mb-0">Individually Quick Frozen technology locks in nutrition and taste instantly.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon-circle">
+                        <i class="fas fa-halal fa-2x"></i>
+                    </div>
+                    <h5 class="fw-bold">Halal Certified</h5>
+                    <p class="small text-muted mb-0">100% Halal certified processes, ensuring peace of mind for you and your family.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

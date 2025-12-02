@@ -1,0 +1,86 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    /* ... Same CSS ... */
+    .admin-bg { background-color: #f8f9fa; min-height: 100vh; padding: 40px 0; }
+    .admin-search-card { background: #fff; border-radius: 50px; padding: 0; box-shadow: 0 5px 20px rgba(0,0,0,0.03); display: flex; align-items: center; border: 1px solid #eee; width: 100%; height: 50px; overflow: hidden; position: relative; }
+    .admin-search-input { border: none; padding: 0 20px; height: 100%; width: 100%; flex-grow: 1; outline: none; background: transparent; font-size: 0.95rem; color: #333; margin: 0; }
+    .admin-search-btn { background-color: #006837; color: white; border: none; border-radius: 0 50px 50px 0; height: 100%; padding: 0 30px; font-weight: 600; transition: 0.3s; white-space: nowrap; display: flex; align-items: center; justify-content: center; margin: 0; cursor: pointer; }
+    .table-container { background: #fff; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); overflow: hidden; border: none; margin-top: 20px; }
+    .table-header { background-color: #006837; color: white; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
+    .table-header th { padding: 18px; font-weight: 600; border: none; }
+    .table-row td { padding: 20px 18px; vertical-align: middle; border-bottom: 1px solid #f9f9f9; color: #555; }
+    
+    /* Mobile Cards */
+    .mobile-order-card { background: #fff; border-radius: 15px; padding: 20px; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; overflow: visible; position: relative; }
+    .mobile-label { font-size: 0.75rem; text-transform: uppercase; color: #999; font-weight: 700; margin-bottom: 2px; }
+    .mobile-value { font-size: 1rem; font-weight: 600; color: #333; margin-bottom: 12px; }
+    .status-badge { padding: 6px 15px; border-radius: 30px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; display: inline-block; }
+    .status-Pending { background-color: #fff8e1; color: #ffa000; border: 1px solid #ffe082; }
+    .status-Confirmed { background-color: #e3f2fd; color: #1976d2; border: 1px solid #90caf9; }
+    .status-Dispatch { background-color: #e0f7fa; color: #006064; border: 1px solid #80deea; }
+    .status-Delivered { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+    .status-Return { background-color: #f3e5f5; color: #7b1fa2; border: 1px solid #ce93d8; }
+    .status-Cancel { background-color: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+    .btn-action { background-color: #f8f9fa; color: #333; border: 1px solid #ddd; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-decoration: none; }
+</style>
+
+<div class="admin-bg">
+    <div class="container">
+        <div class="row align-items-center mb-4 g-3">
+            <div class="col-md-6"><a href="{% url 'admin_dashboard' %}" class="text-decoration-none text-muted fw-bold small mb-1 d-block"><i class="fas fa-arrow-left me-1"></i> Back to Dashboard</a><h2 class="fw-bold text-dark m-0">Order Management</h2></div>
+            <div class="col-md-6"><form method="GET" class="admin-search-card"><i class="fas fa-search text-muted ms-3"></i><input type="text" name="q" class="admin-search-input" placeholder="Search by Order ID or Name..." value="{{ query|default:'' }}"><button type="submit" class="admin-search-btn">Search</button></form></div>
+        </div>
+
+        <!-- Desktop -->
+        <div class="table-container d-none d-md-block">
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead class="table-header">
+                        <tr>
+                            <th class="ps-4">ID</th><th>Date</th><th>Customer</th><th>Total</th><th>Payment</th><th>Status</th><th class="text-end pe-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr class="table-row">
+                            <td class="ps-4 fw-bold text-dark">#{{ order.id }}</td>
+                            <td class="small text-muted">{{ order.created_at|date:"d M Y" }}</td>
+                            <td><span class="fw-bold text-dark">{{ order.first_name }} {{ order.last_name }}</span></td>
+                            <!-- FIXED PRICE -->
+                            <td class="fw-bold text-success">Rs. {{ order.total_amount|floatformat:0 }}</td>
+                            <td><span class="badge bg-light text-dark border text-uppercase">{{ order.payment_method }}</span></td>
+                            <td><span class="status-badge status-{{ order.status }}">{{ order.status }}</span></td>
+                            <td class="text-end pe-4"><a href="{% url 'admin_order_detail' order.id %}" class="btn-action">Manage ></a></td>
+                        </tr>
+                        {% empty %}<tr><td colspan="7" class="text-center py-5 text-muted">No orders found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile -->
+        <div class="d-md-none">
+            {% for order in orders %}
+            <div class="mobile-order-card">
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                    <span class="fw-bold text-dark">#{{ order.id }}</span>
+                    <span class="small text-muted">{{ order.created_at|date:"d M, Y" }}</span>
+                </div>
+                <div class="row">
+                    <div class="col-6"><div class="mobile-label">Customer</div><div class="mobile-value text-truncate">{{ order.first_name }}</div></div>
+                    <!-- FIXED PRICE -->
+                    <div class="col-6 text-end"><div class="mobile-label">Total</div><div class="mobile-value text-success">Rs. {{ order.total_amount|floatformat:0 }}</div></div>
+                    <div class="col-6"><div class="mobile-label">Status</div><span class="status-badge status-{{ order.status }}">{{ order.status }}</span></div>
+                    <div class="col-6 text-end"><div class="mobile-label">Payment</div><span class="badge bg-light text-dark border">{{ order.payment_method|upper }}</span></div>
+                </div>
+                <div class="mt-3 pt-3 border-top pb-1"><a href="{% url 'admin_order_detail' order.id %}" class="btn btn-dark w-100 rounded-pill fw-bold">Manage Order</a></div>
+            </div>
+            {% empty %}<div class="text-center py-5 text-muted">No orders found.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

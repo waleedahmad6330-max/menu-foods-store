@@ -1,0 +1,93 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    .admin-form-container { background: #f8f9fa; min-height: 90vh; padding: 50px 0; }
+    .form-card {
+        background: #fff; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+        padding: 40px; max-width: 800px; margin: 0 auto;
+    }
+    .form-label { font-weight: 700; font-size: 0.85rem; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .clean-input {
+        background-color: #fcfcfc; border: 1px solid #e0e0e0; border-radius: 10px; padding: 14px; transition: 0.3s;
+    }
+    .clean-input:focus { border-color: #006837; background-color: #fff; box-shadow: 0 0 0 4px rgba(0, 104, 55, 0.1); outline: none; }
+    
+    .multi-select-box {
+        height: 150px; background-color: #fcfcfc; border: 1px solid #e0e0e0; border-radius: 10px; padding: 10px;
+    }
+    
+    .current-img-box {
+        width: 100px; height: 100px; border-radius: 10px; overflow: hidden; border: 1px solid #ddd; margin-bottom: 10px;
+    }
+    .current-img-box img { width: 100%; height: 100%; object-fit: cover; }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #006837 0%, #004d29 100%);
+        color: white; border: none; padding: 15px; border-radius: 50px; width: 100%; font-weight: 700; letter-spacing: 1px; margin-top: 20px; transition: 0.3s;
+    }
+    .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0, 104, 55, 0.3); color: white; }
+</style>
+
+<div class="admin-form-container">
+    <div class="container">
+        <a href="{% url 'admin_products_list' %}" class="text-decoration-none text-muted fw-bold mb-4 d-inline-block hover-link">
+            <i class="fas fa-arrow-left me-2"></i> Back to Products
+        </a>
+
+        <div class="form-card">
+            <h3 class="fw-bold text-dark mb-4 border-bottom pb-3">Edit Product</h3>
+            
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row g-4">
+                    
+                    <!-- Name -->
+                    <div class="col-md-8">
+                        <label class="form-label">Product Name</label>
+                        <input type="text" name="name" class="form-control clean-input" value="{{ product.name }}" required>
+                    </div>
+                    
+                    <!-- Price -->
+                    <div class="col-md-4">
+                        <label class="form-label">Price (Rs)</label>
+                        <input type="number" name="price" class="form-control clean-input" value="{{ product.price }}" required>
+                    </div>
+                    
+                    <!-- Categories -->
+                    <div class="col-12">
+                        <label class="form-label">Select Categories <small class="text-muted ms-2">(Hold Ctrl to select multiple)</small></label>
+                        <select name="categories" class="form-select multi-select-box" multiple required>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if cat in product.categories.all %}selected{% endif %}>{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-12">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control clean-input" rows="3">{{ product.description }}</textarea>
+                    </div>
+
+                    <!-- Image -->
+                    <div class="col-12">
+                        <label class="form-label">Product Image</label>
+                        {% if product.image %}
+                        <div class="current-img-box">
+                            <img src="{{ product.image.url }}" alt="Current Image">
+                        </div>
+                        <small class="text-muted d-block mb-2">Current Image shown above. Upload new to replace.</small>
+                        {% endif %}
+                        <input type="file" name="image" class="form-control clean-input">
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="btn-submit">UPDATE PRODUCT</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,182 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    /* Page Styling */
+    .category-header {
+        background-color: #fff;
+        padding: 50px 0;
+        margin-bottom: 40px;
+        position: relative;
+        text-align: center;
+    }
+    /* Yellow Accent Line under Title */
+    .category-header::after {
+        content: '';
+        display: block;
+        width: 60px;
+        height: 4px;
+        background: #fecb00; /* Menu Yellow */
+        margin: 15px auto 0;
+        border-radius: 2px;
+    }
+
+    /* Aesthetic Card Styling */
+    .product-card {
+        border: none;
+        border-radius: 16px;
+        transition: all 0.3s ease;
+        background: #fff;
+        overflow: hidden;
+        position: relative;
+        /* Flexbox for Alignment */
+        height: 100%; 
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.03); /* Soft initial shadow */
+    }
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.08); /* Deep shadow on hover */
+    }
+    
+    .product-img-wrapper {
+        height: 220px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #fff;
+        padding: 15px;
+    }
+    .product-img-wrapper img {
+        max-height: 100%;
+        max-width: 100%;
+        transition: transform 0.5s ease;
+    }
+    .product-card:hover .product-img-wrapper img {
+        transform: scale(1.1);
+    }
+    
+    /* Card Body */
+    .card-body {
+        padding: 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .card-title {
+        font-size: 1rem !important;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+    .card-title a { text-decoration: none; color: #333; transition: 0.2s; }
+    .card-title a:hover { color: #006837; }
+
+    /* Alignment Fix Wrapper */
+    .mt-auto-wrapper {
+        margin-top: auto; 
+    }
+    
+    .price-tag {
+        color: #006837;
+        font-weight: 800;
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+    }
+    
+    /* Aesthetic Button */
+    .btn-add-cart {
+        background: linear-gradient(135deg, #006837 0%, #004d29 100%);
+        color: white;
+        border-radius: 50px;
+        font-weight: 700;
+        padding: 10px 0;
+        transition: 0.3s;
+        width: 100%;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 104, 55, 0.2);
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+    .btn-add-cart:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 104, 55, 0.35);
+        color: white;
+    }
+</style>
+
+<!-- Category Header -->
+<div class="category-header">
+    <div class="container">
+        <h2 class="fw-bold mb-2 text-uppercase text-dark" style="letter-spacing: 1px;">{{ category.name }}</h2>
+        <p class="text-muted mb-0">Premium Quality & Freshness Guaranteed</p>
+    </div>
+</div>
+
+<div class="container mb-5" style="min-height: 60vh;">
+    
+    {% if products %}
+    <div class="row g-4"> 
+        {% for product in products %}
+        <div class="col-6 col-md-3 d-flex align-items-stretch"> 
+            <div class="product-card w-100">
+                <!-- Image -->
+                <a href="{% url 'product_detail' product.id %}" class="product-img-wrapper">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    {% else %}
+                        <img src="https://via.placeholder.com/200x200?text=No+Image" alt="No Image">
+                    {% endif %}
+                </a>
+                
+                <!-- Body -->
+                <div class="card-body">
+                    <div class="mb-2">
+                        <span class="badge bg-light text-muted border text-uppercase" style="font-size: 0.65rem; letter-spacing: 0.5px;">
+                            {{ product.category.name|default:"General" }}
+                        </span>
+                    </div>
+                    
+                    <h5 class="card-title">
+                        <a href="{% url 'product_detail' product.id %}">
+                            {{ product.name }}
+                        </a>
+                    </h5>
+                    
+                   
+                    <div class="mt-auto-wrapper">
+                        <p class="price-tag">Rs. {{ product.price|floatformat:0 }}</p>
+                        
+                        <!-- Add to Cart Form -->
+                        <form action="{% url 'add_to_cart' product.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-add-cart">
+                                <i class="fas fa-shopping-basket me-1"></i> <span class="d-none d-md-inline">Add to Cart</span><span class="d-inline d-md-none">Add</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% else %}
+    <div class="text-center py-5">
+        <div class="opacity-25 mb-3">
+            <i class="fas fa-box-open fa-4x text-muted"></i>
+        </div>
+        <h4 class="text-muted fw-bold">Coming Soon</h4>
+        <p class="text-muted small mb-4">We are stocking up fresh products for this category.</p>
+        <a href="{% url 'home' %}" class="btn btn-outline-success rounded-pill px-4 fw-bold">Browse All Products</a>
+    </div>
+    {% endif %}
+    
+</div>
+{% endblock %}

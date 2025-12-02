@@ -1,0 +1,114 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    .membership-section { min-height: 100vh; background-color: #fff; overflow: hidden; }
+    
+    /* Image Styling */
+    .promo-image {
+        background: url('https://images.unsplash.com/photo-1543353071-873f17a7a088?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center/cover;
+        position: relative;
+        min-height: 300px;
+    }
+    @media (min-width: 992px) { .promo-image { min-height: 100vh; } }
+
+    .promo-overlay {
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(to bottom, rgba(0, 104, 55, 0.4), rgba(0, 0, 0, 0.8));
+        display: flex; flex-direction: column; justify-content: flex-end; padding: 30px; color: white;
+    }
+    
+    /* Form Inputs */
+    .clean-input { border: none; border-bottom: 2px solid #eee; border-radius: 0; padding: 15px 0; background: transparent; width: 100%; }
+    .clean-input:focus { border-bottom-color: #006837; outline: none; box-shadow: none; }
+    
+    /* Button */
+    .btn-black { background: #000; color: #fff; border-radius: 50px; padding: 15px 40px; font-weight: 600; border: none; width: 100%; }
+    .btn-black:hover { background: #333; transform: translateY(-3px); }
+
+    /* New Benefits Box Styling */
+    .benefit-box {
+        text-align: center;
+        padding: 15px 10px;
+        background-color: #f9f9f9;
+        border-radius: 12px;
+        border: 1px solid #eee;
+        transition: 0.3s;
+    }
+    .benefit-box:hover { background-color: #f0fdf4; border-color: #006837; }
+    .benefit-icon { color: #006837; font-size: 1.5rem; margin-bottom: 8px; }
+    .benefit-text { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #555; }
+</style>
+
+<div class="membership-section">
+    <div class="row g-0 h-100">
+        
+        <!-- Left Visuals -->
+        <div class="col-12 col-lg-5 promo-image">
+            <div class="promo-overlay">
+                <h2 class="display-5 fw-bold mb-2">Eat Better.<br>Live Better.</h2>
+                <p class="lead mb-3 text-white-50 small">Join the Menu Exclusive Club.</p>
+            </div>
+        </div>
+
+        <!-- Right Form Section -->
+        <div class="col-12 col-lg-7 d-flex align-items-center justify-content-center bg-white py-5">
+            <div class="p-4 w-100" style="max-width: 600px;">
+                
+                <div class="text-center mb-4">
+                    <h6 class="text-success fw-bold text-uppercase ls-2">Premium Club</h6>
+                    <h2 class="fw-bold mb-3">Become a Member</h2>
+                    
+                    <!-- NEW BENEFITS BLOCK -->
+                    <div class="row g-2 mb-4 justify-content-center">
+                        <div class="col-4">
+                            <div class="benefit-box">
+                                <div class="benefit-icon"><i class="fas fa-shipping-fast"></i></div>
+                                <div class="benefit-text">Free Delivery</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="benefit-box">
+                                <div class="benefit-icon"><i class="fas fa-tags"></i></div>
+                                <div class="benefit-text">Flat 10% Off</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="benefit-box">
+                                <div class="benefit-icon"><i class="fas fa-gift"></i></div>
+                                <div class="benefit-text">Bonus Deals</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-inline-block bg-light border border-success rounded-pill px-4 py-2">
+                        <span class="text-muted small fw-bold">Lifetime Fee:</span>
+                        <span class="text-success fw-bold fs-5 ms-2">Rs. 2,000</span>
+                    </div>
+                </div>
+
+                <form method="POST" action="{% url 'membership' %}">
+                    {% csrf_token %}
+                    <div class="row g-4">
+                        <div class="col-md-6"><input type="text" name="first_name" class="form-control clean-input" placeholder="First Name" required></div>
+                        <div class="col-md-6"><input type="text" name="last_name" class="form-control clean-input" placeholder="Last Name" required></div>
+                        <div class="col-12"><input type="email" name="email" class="form-control clean-input" placeholder="Email" required></div>
+                        <div class="col-12"><input type="tel" name="phone" class="form-control clean-input" placeholder="Phone" required></div>
+                        <div class="col-12"><input type="password" name="password" class="form-control clean-input" placeholder="Password" required></div>
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-black shadow-lg d-flex justify-content-center align-items-center">
+                                <span>PAY & JOIN NOW</span> <i class="fas fa-lock ms-2 small"></i>
+                            </button>
+                            <small class="text-muted mt-2 d-block text-center">Secured by Stripe</small>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <p class="text-muted small">Already a member? <a href="{% url 'login' %}" class="text-dark fw-bold text-decoration-none">Log in</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    .admin-form-container { background: #f8f9fa; min-height: 90vh; padding: 50px 0; }
+    .form-card {
+        background: #fff; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+        padding: 40px; max-width: 500px; margin: 0 auto;
+    }
+    .clean-input {
+        background-color: #fcfcfc; border: 1px solid #e0e0e0; border-radius: 10px; padding: 14px; transition: 0.3s;
+    }
+    .clean-input:focus { border-color: #fecb00; background-color: #fff; box-shadow: 0 0 0 4px rgba(254, 203, 0, 0.15); outline: none; }
+    
+    .btn-add {
+        background: #fecb00; color: #000; border: none; padding: 15px; border-radius: 50px; width: 100%; font-weight: 700; letter-spacing: 1px; margin-top: 20px; transition: 0.3s;
+    }
+    .btn-add:hover { background-color: #e5b700; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(254, 203, 0, 0.2); }
+</style>
+
+<div class="admin-form-container">
+    <div class="container">
+        <a href="{% url 'admin_categories_list' %}" class="text-decoration-none text-muted fw-bold mb-4 d-inline-block">
+            <i class="fas fa-arrow-left me-2"></i> Back to List
+        </a>
+
+        <div class="form-card">
+            <div class="text-center mb-4">
+                <h3 class="fw-bold text-dark">Edit Category</h3>
+            </div>
+            
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="fw-bold text-muted small text-uppercase mb-2">Category Name</label>
+                    <input type="text" name="name" class="form-control clean-input" value="{{ category.name }}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold text-muted small text-uppercase mb-2">Cover Image</label>
+                    {% if category.image %}
+                    <div class="mb-2">
+                        <img src="{{ category.image.url }}" width="80" height="80" class="rounded-circle border">
+                    </div>
+                    {% endif %}
+                    <input type="file" name="image" class="form-control clean-input">
+                </div>
+                <button type="submit" class="btn-add">UPDATE CATEGORY</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

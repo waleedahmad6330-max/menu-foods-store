@@ -1,0 +1,102 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Carousel Styling */
+    #heroCarousel { position: relative; height: 500px; overflow: hidden; }
+    .carousel-item { height: 500px; }
+    .carousel-item img { height: 100%; width: 100%; object-fit: cover; filter: brightness(0.6); }
+    .hero-overlay-content { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; z-index: 10; color: white; padding: 20px; }
+    
+    /* Dots */
+    .carousel-indicators { bottom: 20px; }
+    .carousel-indicators button { width: 12px !important; height: 12px !important; border-radius: 50%; background-color: rgba(255, 255, 255, 0.5) !important; border: 2px solid transparent !important; margin: 0 5px !important; transition: all 0.3s ease; }
+    .carousel-indicators button.active { background-color: #fecb00 !important; transform: scale(1.2); opacity: 1; }
+
+    @media (max-width: 768px) {
+        #heroCarousel, .carousel-item { height: 300px; }
+        .display-3 { font-size: 2rem; }
+        .lead { font-size: 1rem; }
+        .product-img-wrapper { height: 150px !important; }
+        .product-img-wrapper img { padding: 10px; }
+        .btn-add-cart { font-size: 0.8rem; padding: 5px 0; }
+        .card-body { padding: 10px !important; }
+        .card-title { font-size: 0.9rem !important; }
+        .price-tag { font-size: 1rem !important; }
+    }
+
+    .product-card { border: none; border-radius: 15px; transition: all 0.3s ease; background: #fff; overflow: hidden; position: relative; }
+    .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    .product-img-wrapper { height: 200px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #fff; }
+    .product-img-wrapper img { max-height: 100%; max-width: 100%; transition: transform 0.5s ease; }
+    .product-card:hover .product-img-wrapper img { transform: scale(1.1); }
+    .price-tag { color: var(--primary-green); font-weight: 800; font-size: 1.2rem; }
+    .btn-add-cart { background-color: var(--primary-green); color: white; border-radius: 50px; font-weight: 600; padding: 8px 20px; transition: 0.2s; width: 100%; border: none; }
+    .btn-add-cart:hover { background-color: #004d29; color: #fff; }
+</style>
+
+<div class="position-relative mb-4 mb-md-5">
+    <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item active"><img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80" class="d-block w-100" alt="Cooking"></div>
+            <div class="carousel-item"><img src="https://images.unsplash.com/photo-1547592180-85f173990554?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80" class="d-block w-100" alt="Family Dinner"></div>
+            <div class="carousel-item"><img src="https://images.unsplash.com/photo-1606787366850-de6330128bfc?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80" class="d-block w-100" alt="Fresh Food"></div>
+        </div>
+    </div>
+    <div class="hero-overlay-content">
+        <h1 class="display-3 fw-bold text-shadow mb-2">MOTHERS KI NO.1 CHOICE</h1>
+        <p class="lead mb-4 fw-bold text-warning text-shadow">Healthy, Delicious, and Fresh Frozen Foods.</p>
+        <a href="#featured" class="btn btn-warning btn-lg rounded-pill px-5 fw-bold shadow hover-scale">Shop Now</a>
+    </div>
+</div>
+
+<div class="container mb-4 mb-md-5">
+    <div class="row text-center g-3">
+        <div class="col-6 col-md-3"><div class="p-3 border rounded bg-white shadow-sm h-100"><i class="fas fa-shipping-fast fa-2x text-success mb-2"></i><h6 class="fw-bold m-0">Fast Delivery</h6></div></div>
+        <div class="col-6 col-md-3"><div class="p-3 border rounded bg-white shadow-sm h-100"><i class="fas fa-snowflake fa-2x text-info mb-2"></i><h6 class="fw-bold m-0">Always Frozen</h6></div></div>
+        <div class="col-6 col-md-3"><div class="p-3 border rounded bg-white shadow-sm h-100"><i class="fas fa-check-circle fa-2x text-warning mb-2"></i><h6 class="fw-bold m-0">Halal Certified</h6></div></div>
+        <div class="col-6 col-md-3"><div class="p-3 border rounded bg-white shadow-sm h-100"><i class="fas fa-headset fa-2x text-primary mb-2"></i><h6 class="fw-bold m-0">24/7 Support</h6></div></div>
+    </div>
+</div>
+
+<div class="container pb-5" id="featured">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold m-0" style="color: var(--primary-green);">Best Sellers</h3>
+        <a href="#" class="text-decoration-none text-muted small fw-bold">View All <i class="fas fa-arrow-right"></i></a>
+    </div>
+
+    <div class="row g-3">
+        {% for product in products %}
+        <div class="col-6 col-md-3">
+            <div class="product-card h-100 shadow-sm">
+                <a href="{% url 'product_detail' product.id %}" class="product-img-wrapper">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    {% else %}
+                        <img src="https://via.placeholder.com/200x200?text=No+Image" alt="No Image">
+                    {% endif %}
+                </a>
+                <div class="card-body text-center d-flex flex-column p-3">
+                    <div class="mb-1"><span class="badge bg-light text-dark border" style="font-size: 0.7rem;">{{ product.category.name|default:"General" }}</span></div>
+                    <h5 class="card-title fw-bold text-dark text-truncate w-100"><a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark">{{ product.name }}</a></h5>
+                    <div class="mt-auto">
+                        
+                        <p class="price-tag mb-2">Rs. {{ product.price|floatformat:0 }}</p>
+                        <form action="{% url 'add_to_cart' product.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-add-cart"><span class="d-none d-md-inline">Add to Cart</span><span class="d-inline d-md-none">Add</span><i class="fas fa-cart-plus ms-1"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

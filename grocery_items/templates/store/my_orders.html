@@ -1,0 +1,115 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    .dashboard-container {
+        background-color: #f8f9fa;
+        min-height: 85vh;
+        padding: 50px 0;
+    }
+    .order-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        background: #fff;
+        overflow: hidden;
+    }
+    .table-custom th {
+        background-color: #fcfcfc;
+        color: #888;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        padding: 20px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    .table-custom td {
+        padding: 20px;
+        vertical-align: middle;
+        color: #444;
+        border-bottom: 1px solid #f9f9f9;
+    }
+    .status-badge {
+        padding: 8px 15px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .status-Pending { background-color: #fff8e1; color: #ffa000; }
+    .status-Processing { background-color: #e3f2fd; color: #1e88e5; }
+    .status-Shipped { background-color: #e8eaf6; color: #3949ab; }
+    .status-Delivered { background-color: #e8f5e9; color: #43a047; }
+    .status-Cancelled { background-color: #ffebee; color: #e53935; }
+</style>
+
+<div class="dashboard-container">
+    <div class="container">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-dark mb-1">My Orders</h2>
+                <p class="text-muted small">Track your past and current orders</p>
+            </div>
+            <a href="{% url 'home' %}" class="btn btn-outline-success rounded-pill fw-bold btn-sm px-4">
+                <i class="fas fa-shopping-bag me-2"></i> Shop More
+            </a>
+        </div>
+
+        {% if orders %}
+        <div class="order-card">
+            <div class="table-responsive">
+                <table class="table table-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date Placed</th>
+                            <th>Total Amount</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td class="fw-bold text-dark">#{{ order.id }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="far fa-calendar-alt text-muted me-2"></i>
+                                    {{ order.created_at|date:"d M, Y" }}
+                                </div>
+                            </td>
+                            <td class="fw-bold" style="color: #006837;">Rs. {{ order.total_amount }}</td>
+                            <td>
+                                {% if order.payment_method == 'cod' %}
+                                    <span class="badge bg-light text-dark border"><i class="fas fa-money-bill-wave me-1"></i> Cash</span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark border"><i class="fab fa-stripe me-1"></i> Online</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ order.status }}">
+                                    {{ order.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="mb-3 opacity-25">
+                <i class="fas fa-box-open fa-5x"></i>
+            </div>
+            <h4 class="fw-bold text-muted">No orders found</h4>
+            <p class="text-muted mb-4">Looks like you haven't placed any orders yet.</p>
+            <a href="{% url 'home' %}" class="btn btn-success rounded-pill px-5 py-2 fw-bold shadow-sm" style="background: #006837;">Start Shopping</a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

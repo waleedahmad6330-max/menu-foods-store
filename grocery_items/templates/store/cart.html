@@ -1,0 +1,102 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+
+<style>
+    /* Cart Styles (Same) */
+    .cart-table thead th { border-bottom: 2px solid #f0f0f0; font-size: 0.85rem; text-transform: uppercase; color: #888; font-weight: 600; padding-bottom: 15px; }
+    .cart-item-row td { padding: 20px 10px; vertical-align: middle; border-bottom: 1px solid #f9f9f9; }
+    .product-img-thumbnail { width: 80px; height: 80px; object-fit: cover; border-radius: 12px; border: 1px solid #eee; padding: 2px; background: #fff; }
+    .qty-control { display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 50px; padding: 5px; width: fit-content; margin: 0 auto; border: 1px solid #eee; }
+    .qty-btn { width: 30px; height: 30px; border-radius: 50%; border: none; background: #fff; color: #333; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-decoration: none; transition: 0.2s; }
+    .qty-btn:hover { background: #006837; color: white; }
+    .qty-value { margin: 0 15px; font-weight: 700; color: #333; }
+    .btn-remove { color: #dc3545; background: #fff5f5; border: none; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+    .btn-remove:hover { background: #dc3545; color: white; transform: scale(1.1); }
+    .summary-card { background: #fff; border-radius: 16px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.02); }
+    .summary-row { display: flex; justify-content: space-between; margin-bottom: 15px; color: #555; font-size: 0.95rem; }
+    .total-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px; padding-top: 20px; border-top: 2px dashed #eee; font-weight: 800; color: #000; font-size: 1.2rem; }
+    .btn-checkout { background: linear-gradient(135deg, #006837 0%, #004d29 100%); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 600; width: 100%; display: block; text-align: center; text-decoration: none; box-shadow: 0 5px 15px rgba(0, 104, 55, 0.2); }
+    .btn-checkout:hover { color: white; box-shadow: 0 8px 25px rgba(0, 104, 55, 0.3); transform: translateY(-2px); }
+</style>
+
+<div class="bg-light py-5" style="min-height: 85vh;">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-4" style="color: #222;">Shopping Cart</h4>
+                        <div class="table-responsive">
+                            <table class="table cart-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-0" style="width: 40%;">Product</th>
+                                        <th class="text-center">Price</th>
+                                        <th class="text-center">Quantity</th>
+                                        <th class="text-end">Total</th>
+                                        <th class="text-end pe-0">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in cart_items %}
+                                    <tr class="cart-item-row">
+                                        <td class="ps-0">
+                                            <div class="d-flex align-items-center">
+                                                {% if item.product.image %}<img src="{{ item.product.image.url }}" class="product-img-thumbnail me-3 shadow-sm">{% else %}<img src="https://via.placeholder.com/80" class="product-img-thumbnail me-3">{% endif %}
+                                                <div><h6 class="mb-1 fw-bold text-dark">{{ item.product.name }}</h6><small class="text-muted text-uppercase" style="font-size: 0.75rem;">{{ item.product.category.name }}</small></div>
+                                            </div>
+                                        </td>
+                                        <!-- FIXED PRICES HERE -->
+                                        <td class="text-center text-muted fw-bold">Rs. {{ item.product.price|floatformat:0 }}</td>
+                                        <td class="text-center">
+                                            <div class="qty-control"><a href="{% url 'decrease_cart' item.product.id %}" class="qty-btn">-</a><span class="qty-value">{{ item.quantity }}</span><a href="{% url 'increase_cart' item.product.id %}" class="qty-btn">+</a></div>
+                                        </td>
+                                        <!-- FIXED PRICES HERE -->
+                                        <td class="text-end fw-bold" style="color: #006837;">Rs. {{ item.total_price|floatformat:0 }}</td>
+                                        <td class="text-end pe-0"><a href="{% url 'remove_from_cart' item.product.id %}" class="btn-remove ms-auto" title="Remove Item"><i class="fas fa-trash-alt"></i></a></td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="5" class="text-center py-5"><i class="fas fa-shopping-basket fa-4x text-muted mb-3 opacity-25"></i><h5 class="text-muted fw-bold mb-2">Your cart is empty</h5><a href="{% url 'home' %}" class="btn btn-outline-success rounded-pill px-5 mt-3 fw-bold">Start Shopping</a></td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% if cart_items %}<div class="mt-3"><a href="{% url 'home' %}" class="text-decoration-none text-muted fw-bold small"><i class="fas fa-arrow-left me-2"></i> Continue Shopping</a></div>{% endif %}
+            </div>
+
+            {% if cart_items %}
+            <div class="col-lg-4">
+                <div class="summary-card position-sticky" style="top: 100px;">
+                    <h5 class="fw-bold mb-4">Order Summary</h5>
+                    <!-- FIXED PRICES HERE -->
+                    <div class="summary-row"><span>Subtotal</span><span class="fw-bold text-dark">Rs. {{ subtotal|floatformat:0 }}</span></div>
+                    
+                    {% if is_member %}
+                    <div class="summary-row text-success"><span><i class="fas fa-crown me-1"></i> Member Discount</span><span class="fw-bold">- Rs. {{ discount|floatformat:0 }}</span></div>
+                    {% endif %}
+
+                    <div class="summary-row">
+                        <span>Shipping</span>
+                        {% if delivery_fee == 0 %}<span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i> Free</span>
+                        {% else %}<span class="fw-bold text-dark">Rs. {{ delivery_fee|floatformat:0 }}</span>{% endif %}
+                    </div>
+                    
+                    <hr class="my-4 border-secondary opacity-10">
+                    
+                    <!-- FIXED PRICES HERE -->
+                    <div class="total-row"><span>Total</span><span class="text-danger">Rs. {{ grand_total|floatformat:0 }}</span></div>
+                    
+                    {% if not is_member %}<div class="alert alert-warning small mt-3 mb-0 border-0"><i class="fas fa-info-circle me-1"></i> Join Membership to get <strong>Free Delivery</strong> & <strong>10% Off</strong>!</div>{% endif %}
+
+                    <a href="{% url 'checkout' %}" class="btn-checkout mt-4">Proceed to Checkout <i class="fas fa-arrow-right ms-2"></i></a>
+                    <div class="text-center mt-4"><p class="small text-muted mb-0"><i class="fas fa-lock me-1"></i> Secure Checkout</p></div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

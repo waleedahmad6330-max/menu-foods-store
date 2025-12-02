@@ -1,0 +1,126 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    /* Search Page Specific CSS */
+    .search-header {
+        background-color: #f9f9f9;
+        padding: 30px 0;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 40px;
+    }
+    
+    .product-card {
+        border: none;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        background: #fff;
+        overflow: hidden;
+        height: 100%;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+    }
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    
+    .product-img-wrapper {
+        height: 220px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #fff;
+        position: relative;
+    }
+    .product-img-wrapper img {
+        max-height: 100%;
+        max-width: 100%;
+        padding: 15px;
+        transition: transform 0.5s ease;
+    }
+    .product-card:hover .product-img-wrapper img {
+        transform: scale(1.1);
+    }
+    
+    .btn-add-cart {
+        background-color: #006837;
+        color: white;
+        border-radius: 50px;
+        font-weight: 600;
+        padding: 8px 0;
+        transition: 0.2s;
+        width: 100%;
+        border: none;
+    }
+    .btn-add-cart:hover {
+        background-color: #004d29;
+        color: #fff;
+    }
+</style>
+
+<!-- Search Header Section -->
+<div class="search-header text-center">
+    <div class="container">
+        <h2 class="fw-bold mb-2">Search Results</h2>
+        <p class="text-muted mb-0">
+            Found <span class="text-success fw-bold">{{ products|length }}</span> results for "<span class="text-dark fst-italic">{{ query }}</span>"
+        </p>
+    </div>
+</div>
+
+<div class="container mb-5" style="min-height: 50vh;">
+    {% if products %}
+        <div class="row g-4">
+            {% for product in products %}
+            <div class="col-6 col-md-3">
+                <div class="product-card d-flex flex-column">
+                    <!-- Image -->
+                    <a href="{% url 'product_detail' product.id %}" class="product-img-wrapper">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                        {% else %}
+                        <img src="https://via.placeholder.com/200x200?text=No+Image" alt="No Image">
+                        {% endif %}
+                    </a>
+                    
+                    <!-- Body -->
+                    <div class="card-body text-center d-flex flex-column p-3">
+                        <div class="mb-2">
+                            <span class="badge bg-light text-dark border">{{ product.category.name }}</span>
+                        </div>
+                        <h6 class="card-title fw-bold text-dark mb-2" style="font-size: 1rem;">
+                            <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark">{{ product.name }}</a>
+                        </h6>
+                        
+                        <div class="mt-auto pt-3">
+                            <h5 class="text-danger fw-bold mb-3">Rs. {{ product.price }}</h5>
+                            
+                            <!-- Add to Cart Form -->
+                            <form action="{% url 'add_to_cart' product.id %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn btn-add-cart shadow-sm">
+                                    Add to Cart <i class="fas fa-shopping-basket ms-1"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    
+    <!-- No Results State -->
+    {% else %}
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-search fa-5x text-light bg-secondary p-4 rounded-circle" style="--bs-bg-opacity: .1; color: #aaa !important;"></i>
+            </div>
+            <h3 class="fw-bold text-dark">No products found</h3>
+            <p class="text-muted">We couldn't find what you were looking for. Try searching for "Chicken", "Burger", or "Veggie".</p>
+            <a href="{% url 'home' %}" class="btn btn-outline-success rounded-pill px-4 mt-3 fw-bold">Back to Home</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

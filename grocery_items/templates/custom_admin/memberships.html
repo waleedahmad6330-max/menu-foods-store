@@ -1,0 +1,50 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<div class="container py-5" style="min-height: 85vh;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark m-0"><i class="fas fa-crown text-warning me-2"></i> Premium Members</h3>
+            <p class="text-muted mb-0 small">List of users with active membership</p>
+        </div>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-dark rounded-pill btn-sm px-4">Dashboard</a>
+    </div>
+
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead style="background: linear-gradient(90deg, #006837, #004d29); color: #fff;">
+                    <tr>
+                        <th class="p-3 ps-4">Member Details</th>
+                        <th>Contact</th>
+                        <th>Email</th>
+                        <th>Member Since</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in members %}
+                    <tr>
+                        <td class="p-3 ps-4">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-check text-success me-3 fa-lg"></i>
+                                <span class="fw-bold text-dark">{{ m.user.first_name }} {{ m.user.last_name }}</span>
+                            </div>
+                        </td>
+                        <td class="text-muted">{{ m.phone }}</td>
+                        <td class="text-muted">{{ m.user.email }}</td>
+                        <td><span class="fw-bold text-dark">{{ m.joined_at|date:"d M, Y" }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center p-5 text-muted">
+                            <i class="fas fa-users-slash fa-3x mb-3 opacity-25"></i><br>
+                            No memberships found yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
