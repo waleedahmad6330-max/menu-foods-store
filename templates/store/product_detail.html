@@ -1,0 +1,418 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .product-container { padding: 60px 0; background-color: #fff; }
+    .image-card { border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; background: #fff; position: relative; height: 500px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: zoom-in; }
+    .product-img { max-width: 90%; max-height: 90%; object-fit: contain; transition: transform 0.5s ease; }
+    .image-card:hover .product-img { transform: scale(1.05); }
+    .zoom-hint { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 50%; box-shadow: 0 5px 15px rgba(0,0,0,0.1); color: #006837; opacity: 0; transition: 0.3s; z-index: 5; }
+    .image-card:hover .zoom-hint { opacity: 1; }
+    .discount-pill { position: absolute; top: 20px; left: 20px; background: #dc3545; color: white; padding: 5px 15px; border-radius: 50px; font-weight: 700; z-index: 10; }
+    
+    .stock-status { display: inline-block; padding: 5px 12px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; margin-bottom: 15px; }
+    .in-stock { background: #e8f5e9; color: #006837; }
+    .low-stock { background: #fff3cd; color: #856404; }
+    .out-stock { background: #f8d7da; color: #721c24; }
+
+    .product-title { font-weight: 800; font-size: 2.2rem; color: #222; margin-bottom: 10px; line-height: 1.2; }
+    .product-price { font-size: 2rem; color: #006837; font-weight: 700; display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+    .old-price { text-decoration: line-through; color: #999; font-size: 1.3rem; font-weight: 500; }
+    .action-wrapper { background: #f8f9fa; padding: 20px; border-radius: 15px; border: 1px solid #eee; margin-bottom: 30px; }
+    .qty-input-group { display: flex; align-items: center; background: #fff; border: 1px solid #ddd; border-radius: 50px; padding: 5px; width: fit-content; }
+    .qty-btn { width: 35px; height: 35px; border-radius: 50%; border: none; background: #f1f1f1; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .qty-btn:hover { background: #006837; color: white; }
+    .qty-display { width: 40px; text-align: center; border: none; font-weight: 700; color: #333; font-size: 1.1rem; background: transparent; }
+    
+    .btn-cart { background: #006837; color: white; border: none; padding: 12px 30px; border-radius: 50px; font-weight: 700; transition: 0.3s; flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; width: 100%; }
+    .btn-cart:hover { background: #004d29; transform: translateY(-2px); color:white; }
+    
+    .btn-buy { background: #fecb00; color: #000; border: none; padding: 12px 30px; border-radius: 50px; font-weight: 700; transition: 0.3s; flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; cursor: pointer; width: 100%; }
+    .btn-buy:hover { background: #e5b700; transform: translateY(-2px); color: #000; }
+    
+    .timer-box { background: #333; color: #fecb00; padding: 10px 20px; border-radius: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    .accordion-item { border: none; border-bottom: 1px solid #f0f0f0; background: transparent; }
+    .accordion-button { background-color: transparent; color: #333; font-weight: 700; font-size: 0.95rem; padding: 20px 0; box-shadow: none !important; text-transform: uppercase; letter-spacing: 0.5px; }
+    .accordion-button:not(.collapsed) { color: #006837; background-color: transparent; }
+    .accordion-button::after { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23333'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e"); }
+    .accordion-button:not(.collapsed)::after { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23006837'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e"); }
+    .accordion-body { padding: 10px 0 25px 0; color: #555; line-height: 1.7; font-size: 0.95rem; }
+
+    /* --- SHAKE ANIMATION (Horizontal) --- */
+    @keyframes shakeBtn {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+        20%, 40%, 60%, 80% { transform: translateX(4px); }
+    }
+    .shake-now {
+        animation: shakeBtn 0.5s ease-in-out;
+    }
+
+    /* --- STICKY BOTTOM BUTTON (Defaults) --- */
+    #sticky-cart-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #fff;
+        padding: 15px 20px;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        z-index: 1000;
+        transform: translateY(120%); /* Hidden initially */
+        transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        display: none; /* Hidden on Desktop by default */
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        border-top: 1px solid #eee;
+    }
+    #sticky-cart-bar.active {
+        transform: translateY(0); /* Slide up */
+    }
+    .sticky-price {
+        font-weight: 800;
+        color: #006837;
+        font-size: 1.2rem;
+    }
+
+    /* --- MOBILE SPECIFIC STYLES --- */
+    @media (max-width: 768px) {
+        .image-card { height: 350px; }
+        .product-title { font-size: 1.5rem; }
+        .product-price { font-size: 1.5rem; }
+        
+        /* Stack buttons: Buy Now on top, Add to Cart below */
+        .btn-action-group {
+            flex-direction: column-reverse; /* This puts the 2nd item (Buy Now) on top */
+            gap: 15px !important;
+        }
+        .btn-action-group button {
+            width: 100%;
+        }
+
+        /* Show Sticky Bar ONLY on Mobile */
+        #sticky-cart-bar {
+            display: flex;
+        }
+    }
+
+    #ajax-toast {
+        visibility: hidden;
+        min-width: 280px;
+        background-color: #006837;
+        color: #fff;
+        text-align: center;
+        border-radius: 50px;
+        padding: 16px;
+        position: fixed;
+        z-index: 9999;
+        left: 50%;
+        top: 30px;
+        transform: translateX(-50%);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        font-weight: 600;
+        opacity: 0;
+        transition: opacity 0.3s, top 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    #ajax-toast.show {
+        visibility: visible;
+        opacity: 1;
+        top: 80px;
+    }
+</style>
+
+<!-- Custom Toast -->
+<div id="ajax-toast">
+    <i class="fas fa-check-circle fa-lg"></i> 
+    <span>Item successfully added!</span>
+</div>
+
+<div class="product-container">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item active text-dark fw-bold">{{ product.name }}</li>
+            </ol>
+        </nav>
+
+        <div class="row g-5">
+            <!-- Left: Image -->
+            <div class="col-lg-6">
+                <div class="image-card" id="product-gallery">
+                    <div class="zoom-hint"><i class="fas fa-search-plus"></i></div>
+                    {% if product.stock > 0 and product.is_discount_active %}
+                        <div class="discount-pill" id="detail-badge">-{{ product.discount_percentage }}%</div>
+                    {% endif %}
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-img">
+                    {% else %}
+                        <img src="https://via.placeholder.com/600x600?text=No+Image" class="product-img">
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Right: Details -->
+            <div class="col-lg-6">
+                <div class="ps-lg-3">
+                    <span class="badge bg-light text-dark border mb-2">{{ product.category.name }}</span>
+                    <h1 class="product-title">{{ product.name }}</h1>
+
+                    <!-- Timer Logic UI -->
+                    {% if product.stock > 0 and product.is_discount_active %}
+                        <div class="timer-box" id="detail-timer" data-endtime="{{ product.discount_end_time|date:'Y-m-d H:i:s' }}">
+                            <i class="fas fa-clock fa-lg"></i> 
+                            <div><small class="d-block text-uppercase" style="font-size: 0.65rem; opacity: 0.8;">Offer Ends In</small><span class="countdown" style="font-size: 1.1rem;">00:00:00</span></div>
+                        </div>
+                    {% endif %}
+
+                    <div class="product-price" id="detail-price-box">
+                        {% if product.stock > 0 and product.is_discount_active %}
+                            <span class="old-price">Rs. {{ product.price|floatformat:0 }}</span>
+                            <span class="current-price">Rs. {{ product.get_price|floatformat:0 }}</span>
+                        {% else %}
+                            <span class="current-price">Rs. {{ product.price|floatformat:0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Stock Status -->
+                    {% if product.stock > 10 %}
+                        <span class="stock-status in-stock"><i class="fas fa-check-circle me-1"></i> Available: {{ product.stock }}</span>
+                    {% elif product.stock > 0 %}
+                        <span class="stock-status low-stock"><i class="fas fa-exclamation-triangle me-1"></i> Low Stock: Only {{ product.stock }} left!</span>
+                    {% else %}
+                        <span class="stock-status out-stock"><i class="fas fa-times-circle me-1"></i> Sold Out</span>
+                    {% endif %}
+
+                    <div class="action-wrapper">
+                        <form id="cartForm" action="{% url 'add_to_cart' product.id %}" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" id="productId" value="{{ product.id }}">
+                            
+                            <div class="d-flex align-items-center flex-wrap gap-4 mb-3">
+                                <label class="fw-bold text-muted small text-uppercase">Quantity:</label>
+                                <div class="qty-input-group">
+                                    <button type="button" class="qty-btn" onclick="updateQty(-1)">-</button>
+                                    <input type="text" name="quantity" id="qtyInput" value="1" class="qty-display" readonly>
+                                    <button type="button" class="qty-btn" onclick="updateQty(1)">+</button>
+                                </div>
+                            </div>
+
+                            <!-- BUTTON GROUP with ID for observing intersection -->
+                            <div class="d-flex gap-3 btn-action-group" id="main-cart-buttons">
+                                {% if product.stock > 0 %}
+                                    <button type="button" id="static-add-cart-btn" onclick="handleCartAction(this, 'add_cart')" class="btn-cart">
+                                        <i class="fas fa-shopping-basket"></i> Add to Cart
+                                    </button>
+                                    <button type="button" onclick="handleCartAction(this, 'buy_now')" class="btn-buy">
+                                        Buy It Now
+                                    </button>
+                                {% else %}
+                                    <button type="button" class="btn-cart" disabled style="background:#ccc; cursor: not-allowed;">Sold Out</button>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Accordions -->
+                    <div class="accordion mt-4" id="productAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingDesc"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDesc" aria-expanded="true">Description</button></h2>
+                            <div id="collapseDesc" class="accordion-collapse collapse show" data-bs-parent="#productAccordion"><div class="accordion-body">{{ product.description|default:"No description available."|linebreaks }}</div></div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingIngr"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseIngr" aria-expanded="false">Ingredients</button></h2>
+                            <div id="collapseIngr" class="accordion-collapse collapse" data-bs-parent="#productAccordion"><div class="accordion-body">{{ product.ingredients|default:"Not specified."|linebreaks }}</div></div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingUse"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUse" aria-expanded="false">How to Use</button></h2>
+                            <div id="collapseUse" class="accordion-collapse collapse" data-bs-parent="#productAccordion"><div class="accordion-body">{{ product.how_to_use|default:"Not specified."|linebreaks }}</div></div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingShip"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseShip" aria-expanded="false">Shipping Info</button></h2>
+                            <div id="collapseShip" class="accordion-collapse collapse" data-bs-parent="#productAccordion"><div class="accordion-body">{{ product.shipping_info|default:"Standard shipping applies."|linebreaks }}</div></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- STICKY BOTTOM CART BAR -->
+<div id="sticky-cart-bar">
+    <div class="d-none d-md-block">
+        <h6 class="m-0 text-truncate" style="max-width: 200px;">{{ product.name }}</h6>
+    </div>
+    <div class="sticky-price">
+        {% if product.stock > 0 and product.is_discount_active %}
+            Rs. {{ product.get_price|floatformat:0 }}
+        {% else %}
+            Rs. {{ product.price|floatformat:0 }}
+        {% endif %}
+    </div>
+    {% if product.stock > 0 %}
+        <button type="button" onclick="handleCartAction(this, 'add_cart')" class="btn-cart py-2" style="max-width: 200px;">
+            <i class="fas fa-shopping-basket"></i> Add to Cart
+        </button>
+    {% else %}
+        <button disabled class="btn btn-secondary btn-sm">Sold Out</button>
+    {% endif %}
+</div>
+
+<script>
+    let maxStock = parseInt("{{ product.stock|default:0 }}") || 0;
+
+    function updateQty(change) {
+        let input = document.getElementById('qtyInput');
+        let currentQty = parseInt(input.value);
+        let newQty = currentQty + change;
+        if (newQty >= 1 && newQty <= maxStock) { input.value = newQty; }
+    }
+
+    // --- CART FUNCTION ---
+    function handleCartAction(btnElement, actionType) {
+        const form = document.getElementById('cartForm');
+        const url = form.getAttribute('action'); 
+        const originalText = btnElement.innerHTML;
+        const qty = document.getElementById('qtyInput').value;
+        
+        btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btnElement.disabled = true;
+
+        const formData = new FormData();
+        formData.append('quantity', qty);
+        formData.append('action', actionType);
+        
+        const csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!csrfTokenInput) {
+            alert("Security Token Missing! Please refresh page.");
+            btnElement.disabled = false;
+            btnElement.innerHTML = originalText;
+            return;
+        }
+
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfTokenInput.value
+            }
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+                return null;
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data) return;
+            
+            btnElement.innerHTML = originalText;
+            btnElement.disabled = false;
+
+            if (data.status === 'success') {
+                const cartCountEl = document.getElementById('cart-badge');
+                if (cartCountEl && data.cart_count !== undefined) {
+                    cartCountEl.innerText = data.cart_count;
+                    cartCountEl.classList.add('animate__animated', 'animate__bounceIn');
+                }
+                if (actionType === 'buy_now') {
+                    window.location.href = "{% url 'cart_page' %}";
+                } else {
+                    showToast("Item successfully added!");
+                }
+            } else {
+                alert(data.message || 'Error adding item.');
+            }
+        })
+        .catch(error => {
+            console.error('Fetch Error:', error);
+            btnElement.innerHTML = originalText;
+            btnElement.disabled = false;
+            alert("Something went wrong.");
+        });
+    }
+
+    function showToast(message) {
+        var toast = document.getElementById("ajax-toast");
+        if(toast) {
+            toast.querySelector('span').innerText = message;
+            toast.className = "show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- 1. SHAKE ANIMATION LOGIC ---
+        const staticBtn = document.getElementById('static-add-cart-btn');
+        if(staticBtn) {
+            setInterval(() => {
+                staticBtn.classList.add('shake-now');
+                setTimeout(() => {
+                    staticBtn.classList.remove('shake-now');
+                }, 500); // Remove class after animation ends (0.5s)
+            }, 6000); // Run every 6 seconds
+        }
+
+        // --- 2. STICKY BUTTON LOGIC (Scroll) ---
+        const mainButtons = document.getElementById('main-cart-buttons');
+        const stickyBar = document.getElementById('sticky-cart-bar');
+
+        if(mainButtons && stickyBar) {
+            // Intersection Observer to detect visibility
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    // Check bounding rect to ensure we only show sticky bar when scrolled DOWN past the button
+                    // entry.boundingClientRect.top < 0 means the element has scrolled UP out of view
+                    if (!entry.isIntersecting && entry.boundingClientRect.top < 0) {
+                        stickyBar.classList.add('active');
+                    } else {
+                        stickyBar.classList.remove('active');
+                    }
+                });
+            }, { threshold: 0 }); // Trigger as soon as 1 pixel is out
+
+            observer.observe(mainButtons);
+        }
+
+        // --- 3. TIMER LOGIC ---
+        try {
+            const timerBox = document.getElementById('detail-timer');
+            if (timerBox) {
+                const endTimeStr = timerBox.dataset.endtime;
+                const endTime = new Date(endTimeStr).getTime();
+                const countdownSpan = timerBox.querySelector('.countdown');
+
+                function updateTimer() {
+                    const now = new Date().getTime();
+                    const distance = endTime - now;
+                    if (distance < 0) {
+                        timerBox.style.display = 'none'; 
+                        return;
+                    }
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                    if(countdownSpan) {
+                         const h = hours < 10 ? "0" + hours : hours;
+                         const m = minutes < 10 ? "0" + minutes : minutes;
+                         const s = seconds < 10 ? "0" + seconds : seconds;
+                         countdownSpan.innerText = h + ":" + m + ":" + s;
+                    }
+                }
+                setInterval(updateTimer, 1000);
+                updateTimer();
+            }
+        } catch (e) {}
+    });
+</script>
+{% endblock %}

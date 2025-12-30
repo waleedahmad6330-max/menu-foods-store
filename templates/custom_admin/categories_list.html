@@ -1,0 +1,62 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    .admin-bg { background-color: #f8f9fa; min-height: 100vh; padding: 40px 0; }
+    .cat-card { background: #fff; border-radius: 20px; padding: 20px; text-align: center; border: 1px solid #eee; transition: all 0.3s ease; height: 100%; position: relative; }
+    .cat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); border-color: #fecb00; }
+    .cat-img-wrapper { width: 100px; height: 100px; margin: 0 auto 15px; border-radius: 50%; overflow: hidden; border: 3px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    .cat-img { width: 100%; height: 100%; object-fit: cover; }
+    .btn-add-new { background-color: #fecb00; color: #000; border: none; padding: 10px 25px; border-radius: 50px; font-weight: 700; transition: 0.3s; text-decoration: none; box-shadow: 0 5px 15px rgba(254, 203, 0, 0.3); }
+    .btn-add-new:hover { background-color: #e5b700; transform: translateY(-2px); color: #000; }
+    .badge-parent { font-size: 0.7rem; background-color: #e8f5e9; color: #006837; border: 1px solid #c8e6c9; margin-bottom: 5px; display: inline-block; }
+</style>
+
+<div class="admin-bg">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <a href="{% url 'admin_dashboard' %}" class="text-decoration-none text-muted fw-bold small mb-1 d-block hover-link"><i class="fas fa-arrow-left me-1"></i> Dashboard</a>
+                <h2 class="fw-bold text-dark m-0">Manage Categories</h2>
+            </div>
+            <a href="{% url 'admin_add_category' %}" class="btn-add-new"><i class="fas fa-tags me-2"></i> Add Category</a>
+        </div>
+
+        <div class="row g-4">
+            {% for c in categories %}
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="cat-card">
+                    <div class="cat-img-wrapper">
+                        {% if c.image %}<img src="{{ c.image.url }}" class="cat-img" alt="{{ c.name }}">{% else %}<div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center text-muted"><i class="fas fa-utensils fa-lg"></i></div>{% endif %}
+                    </div>
+                    
+                    <h5 class="fw-bold mb-1">{{ c.name }}</h5>
+                    
+                    <!-- Show Parents if any -->
+                    {% if c.parents.all %}
+                        <div class="mb-3">
+                            {% for p in c.parents.all %}
+                                <span class="badge badge-parent">{{ p.name }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                         <p class="text-muted small mb-3">Main Category</p>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="{% url 'admin_edit_category' c.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Edit</a>
+                        <a href="{% url 'admin_delete_category' c.id %}" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('Delete {{ c.name }}?');">Delete</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-layer-group fa-4x text-muted opacity-25 mb-3"></i>
+                <h4 class="text-muted fw-bold">No Categories Found</h4>
+                <p class="text-muted small">Create categories to organize your products.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

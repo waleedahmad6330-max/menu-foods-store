@@ -1,0 +1,235 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    .admin-form-container { background: #f8f9fa; min-height: 90vh; padding: 60px 0; }
+    
+    .form-card { 
+        background: #fff; 
+        border-radius: 24px; 
+        box-shadow: 0 20px 50px rgba(0,0,0,0.08); 
+        padding: 40px; 
+        max-width: 550px; 
+        margin: 0 auto; 
+        position: relative;
+        overflow: hidden;
+    }
+
+    .top-accent {
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 8px;
+        background: #fecb00;
+        border-radius: 24px 24px 0 0;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 35px;
+        margin-top: 10px;
+    }
+    .form-header h3 {
+        font-weight: 800;
+        color: #333;
+        letter-spacing: -0.5px;
+    }
+
+    .form-header::after {
+        content: '';
+        display: block;
+        width: 70px;
+        height: 5px;
+        background: #006837; 
+        margin: 12px auto 0;
+        border-radius: 50px;
+    }
+
+    .clean-input { 
+        background-color: #fff; 
+        border: 2px solid #f4f4f4; 
+        border-radius: 15px; 
+        padding: 15px; 
+        width: 100%; 
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        color: #333;
+    }
+    .clean-input:focus { 
+        border-color: #fecb00; 
+        box-shadow: 0 5px 15px rgba(254, 203, 0, 0.1); 
+        outline: none; 
+    }
+
+    /* CUSTOM ROUNDED CONTAINER FOR SELECT BOX */
+    .rounded-select-container {
+        border: 2px solid #f4f4f4;
+        border-radius: 15px;
+        padding: 10px;
+        background: #fff;
+        overflow: hidden;
+    }
+    
+    /* STYLE THE SELECT BOX ITSELF */
+    .clean-select {
+        border: none;
+        width: 100%;
+        background: transparent;
+        outline: none;
+    }
+    .clean-select:focus { outline: none; }
+
+    /* STYLE OPTGROUPS TO LOOK ROUNDED */
+    optgroup {
+        font-weight: 800;
+        font-style: normal;
+        color: #006837;
+        background: #e8f5e9; /* Light Green Background */
+        border-radius: 10px; /* Modern browsers may support this */
+        margin: 5px 0;
+    }
+    option {
+        background: #fff;
+        color: #333;
+        padding: 8px;
+        margin: 2px 0;
+    }
+
+
+    .label-custom {
+        font-weight: 700;
+        font-size: 0.75rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .btn-update { 
+        background: linear-gradient(135deg, #006837, #004d29);
+        color: #fff; 
+        border: none; 
+        padding: 16px; 
+        border-radius: 50px; 
+        width: 100%; 
+        font-weight: 700; 
+        margin-top: 20px; 
+        transition: 0.3s; 
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 10px 20px rgba(0, 104, 55, 0.2);
+    }
+    .btn-update:hover { 
+        transform: translateY(-3px); 
+        box-shadow: 0 15px 30px rgba(0, 104, 55, 0.3); 
+    }
+
+    .multi-select-box { height: 200px; }
+    
+    .divider-line { border-top: 2px dashed #f0f0f0; margin: 30px 0; }
+
+    .alert-warning-custom { 
+        background: #fff8e1; 
+        color: #856404; 
+        border: 1px dashed #fecb00; 
+        border-radius: 15px; 
+        padding: 20px; 
+        font-size: 0.85rem;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+    }
+    
+    .current-img-preview {
+        width: 80px; height: 80px;
+        border-radius: 15px;
+        object-fit: cover;
+        border: 2px solid #f0f0f0;
+        padding: 2px;
+        background: #fff;
+    }
+</style>
+
+<div class="admin-form-container">
+    <div class="container">
+        <a href="{% url 'admin_categories_list' %}" class="text-decoration-none text-muted fw-bold mb-4 d-inline-block hover-green"><i class="fas fa-arrow-left me-2"></i> Back to List</a>
+
+        <div class="form-card">
+            <div class="top-accent"></div>
+
+            <div class="form-header">
+                <div style="width: 60px; height: 60px; background: #fff8e1; color: #fecb00; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; box-shadow: 0 5px 15px rgba(254,203,0,0.1);">
+                    <i class="fas fa-edit fa-lg"></i>
+                </div>
+                <h3>Edit Category</h3>
+            </div>
+            
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="label-custom">Category Name</label>
+                    <input type="text" name="name" class="form-control clean-input" value="{{ category.name }}" required>
+                </div>
+
+                <div class="divider-line"></div>
+
+                <div class="mb-4">
+                    <label class="label-custom">Parent Assignment</label>
+                    
+                    {% if category.children.exists %}
+                        <div class="alert-warning-custom">
+                            <i class="fas fa-exclamation-triangle mt-1"></i>
+                            <div>
+                                <strong>Locked:</strong> 
+                                This category is a <u>Parent</u> to other sub-categories. It cannot be nested inside another category until you remove its children.
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="rounded-select-container">
+                            <select name="parents" class="form-control clean-select multi-select-box" multiple>
+                                <optgroup label="Root Categories (Main)">
+                                    {% for cat in categories %}
+                                        {% if cat.id != category.id and not cat.parents.exists %}
+                                            <option value="{{ cat.id }}" {% if cat in category.parents.all %}selected{% endif %}>&#9679; {{ cat.name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </optgroup>
+                                
+                                <option disabled style="height: 5px; background: transparent;"></option>
+
+                                <optgroup label="Sub Categories (Nested)">
+                                    {% for cat in categories %}
+                                        {% if cat.id != category.id and cat.parents.exists %}
+                                            <option value="{{ cat.id }}" {% if cat in category.parents.all %}selected{% endif %}>&nbsp;&nbsp;- {{ cat.name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center mt-2 text-muted">
+                            <small style="font-size: 0.75rem;"><i class="fas fa-mouse-pointer me-1"></i> Hold <strong>Ctrl/Cmd</strong> to select/deselect parents.</small>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="divider-line"></div>
+
+                <div class="mb-4">
+                    <label class="label-custom">Cover Image</label>
+                    <div class="d-flex align-items-center gap-3">
+                        {% if category.image %}
+                            <img src="{{ category.image.url }}" class="current-img-preview" alt="Current">
+                        {% endif %}
+                        <div class="flex-grow-1">
+                            <input type="file" name="image" class="form-control clean-input" style="padding: 10px;">
+                            <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">Upload new to replace current image.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-update">Update Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

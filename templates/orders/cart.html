@@ -1,0 +1,230 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    /* Cart Specific Styles */
+    .cart-table thead th { border-bottom: 2px solid #f0f0f0; font-size: 0.85rem; text-transform: uppercase; color: #888; font-weight: 600; padding-bottom: 15px; }
+    .cart-item-row td { padding: 20px 10px; vertical-align: middle; border-bottom: 1px solid #f9f9f9; }
+    .product-img-thumbnail { width: 80px; height: 80px; object-fit: cover; border-radius: 12px; border: 1px solid #eee; padding: 2px; background: #fff; }
+    
+    .qty-control { display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 50px; padding: 5px; width: fit-content; margin: 0 auto; border: 1px solid #eee; }
+    .qty-btn { width: 30px; height: 30px; border-radius: 50%; border: none; background: #fff; color: #333; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-decoration: none; transition: 0.2s; }
+    .qty-btn:hover { background: #006837; color: white; }
+    .qty-value { margin: 0 15px; font-weight: 700; color: #333; }
+
+    .btn-remove { color: #dc3545; background: #fff5f5; border: none; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; text-decoration: none; }
+    .btn-remove:hover { background: #dc3545; color: white; transform: scale(1.1); }
+    
+    .summary-card { background: #fff; border-radius: 16px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.02); }
+    .summary-row { display: flex; justify-content: space-between; margin-bottom: 15px; color: #555; font-size: 0.95rem; }
+    .total-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px; padding-top: 20px; border-top: 2px dashed #eee; font-weight: 800; color: #000; font-size: 1.2rem; }
+    
+    .free-delivery-alert { background-color: #e3f2fd; color: #0d47a1; padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; border: 1px solid #bbdefb; }
+    .free-delivery-success { background-color: #e8f5e9; color: #1b5e20; border-color: #c8e6c9; }
+    
+    .btn-checkout { background: linear-gradient(135deg, #006837 0%, #004d29 100%); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 600; width: 100%; display: block; text-align: center; text-decoration: none; box-shadow: 0 5px 15px rgba(0, 104, 55, 0.2); transition: 0.3s; }
+    .btn-checkout:hover { color: white; box-shadow: 0 8px 25px rgba(0, 104, 55, 0.3); transform: translateY(-2px); }
+
+    .empty-cart-container { text-align: center; padding: 80px 0; }
+    .empty-icon { color: #e0e0e0; margin-bottom: 20px; }
+</style>
+
+<div class="bg-light py-5" style="min-height: 85vh;">
+    <div class="container">
+        
+        {% if cart_items %}
+            
+            <!-- FREE DELIVERY ALERT -->
+            {% if is_member %}
+                <div class="free-delivery-alert free-delivery-success shadow-sm" id="delivery-alert">
+                    <i class="fas fa-crown fa-lg me-3 text-warning"></i>
+                    <div><strong>Premium Member!</strong> You get Free Delivery & 10% Off on all orders.</div>
+                </div>
+            {% elif delivery_fee == 0 %}
+                <div class="free-delivery-alert free-delivery-success shadow-sm" id="delivery-alert">
+                    <i class="fas fa-check-circle fa-lg me-3"></i>
+                    <div><strong>Congratulations!</strong> Your order qualifies for Free Delivery.</div>
+                </div>
+            {% else %}
+                <div class="free-delivery-alert shadow-sm" id="delivery-alert">
+                    <i class="fas fa-truck fa-lg me-3"></i>
+                    <div class="w-100">
+                        <span id="alert-text">Add <strong>Rs. <span id="shortfall-amount">{{ shortfall|floatformat:0 }}</span></strong> more to get <span class="fw-bold text-success">Free Delivery</span>!</span>
+                        <div class="progress mt-2" style="height: 6px; width: 100%; max-width: 300px;">
+                            <div class="progress-bar bg-success" id="progress-bar" role="progressbar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="row g-4">
+                <!-- Left: Cart Items -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm rounded-4 mb-4">
+                        <div class="card-body p-4">
+                            <h4 class="fw-bold mb-4" style="color: #222;">Shopping Cart</h4>
+                            <div class="table-responsive">
+                                <table class="table cart-table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th class="ps-0" style="width: 40%;">Product</th>
+                                            <th class="text-center">Price</th>
+                                            <th class="text-center">Quantity</th>
+                                            <th class="text-end">Total</th>
+                                            <th class="text-end pe-0">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in cart_items %}
+                                        <tr class="cart-item-row" id="row-{{ item.product.id }}">
+                                            <td class="ps-0">
+                                                <div class="d-flex align-items-center">
+                                                    {% if item.product.image %}<img src="{{ item.product.image.url }}" class="product-img-thumbnail me-3 shadow-sm">{% endif %}
+                                                    <div><h6 class="mb-1 fw-bold text-dark">{{ item.product.name }}</h6></div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">Rs. {{ item.product.price|floatformat:0 }}</td>
+                                            <td class="text-center">
+                                                <div class="qty-control">
+                                                    <a href="{% url 'decrease_cart' item.product.id %}" class="qty-btn ajax-cart-btn" data-action="decrease" data-id="{{ item.product.id }}">-</a>
+                                                    <span class="qty-value" id="qty-{{ item.product.id }}">{{ item.quantity }}</span>
+                                                    <a href="{% url 'increase_cart' item.product.id %}" class="qty-btn ajax-cart-btn" data-action="increase" data-id="{{ item.product.id }}">+</a>
+                                                </div>
+                                            </td>
+                                            <td class="text-end fw-bold" style="color: #006837;">Rs. <span id="item-total-{{ item.product.id }}">{{ item.total_price|floatformat:0 }}</span></td>
+                                            <td class="text-end pe-0">
+                                                <a href="{% url 'remove_from_cart' item.product.id %}" class="btn-remove ms-auto ajax-cart-btn" data-action="remove" data-id="{{ item.product.id }}"><i class="fas fa-trash-alt"></i></a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Order Summary -->
+                <div class="col-lg-4">
+                    <div class="summary-card position-sticky" style="top: 100px;">
+                        <h5 class="fw-bold mb-4">Order Summary</h5>
+                        <div class="summary-row"><span>Subtotal</span><span class="fw-bold text-dark">Rs. <span id="summary-subtotal">{{ subtotal|floatformat:0 }}</span></span></div>
+                        
+                        {% if is_member %}
+                        <div class="summary-row text-success"><span><i class="fas fa-crown me-1"></i> Member Discount</span><span class="fw-bold">- Rs. <span id="summary-discount">{{ discount|floatformat:0 }}</span></span></div>
+                        {% endif %}
+
+                        <div class="summary-row">
+                            <span>Shipping</span>
+                            <span class="fw-bold text-dark" id="delivery-text">
+                                {% if delivery_fee == 0 %}<span class="text-success"><i class="fas fa-check-circle me-1"></i> Free</span>
+                                {% else %}Rs. <span id="summary-delivery">{{ delivery_fee|floatformat:0 }}</span>{% endif %}
+                            </span>
+                        </div>
+                        
+                        <hr class="my-4 border-secondary opacity-10">
+                        <div class="total-row"><span>Total</span><span class="text-danger">Rs. <span id="summary-total">{{ grand_total|floatformat:0 }}</span></span></div>
+                        
+                        {% if not is_member %}
+                        <div class="alert alert-warning small mt-3 mb-0 border-0">
+                            <i class="fas fa-info-circle me-1"></i> Join Membership to get <strong>Free Delivery</strong> & <strong>10% Off</strong>!
+                        </div>
+                        {% endif %}
+
+                        <a href="{% url 'checkout' %}" class="btn-checkout mt-4">Proceed to Checkout</a>
+                        <div class="text-center mt-4"><p class="small text-muted mb-0"><i class="fas fa-lock me-1"></i> Secure Checkout</p></div>
+                    </div>
+                </div>
+            </div>
+
+        {% else %}
+            
+            <div class="empty-cart-container">
+                <i class="fas fa-shopping-basket fa-5x empty-icon"></i>
+                <h3 class="fw-bold text-dark mb-2">Your Cart is Empty</h3>
+                <p class="text-muted mb-4">Looks like you haven't added anything to your cart yet.</p>
+                <a href="{% url 'home' %}" class="btn btn-success rounded-pill px-5 py-3 fw-bold shadow" style="background-color: #006837;">
+                    Start Shopping
+                </a>
+            </div>
+
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- SAFE INITIALIZATION OF SUBTOTAL ---
+        // Humne isay quotes mein wrap kiya hai aur parseFloat use kiya hai
+        // Taake agar syntax issue ho to bhi script crash na kare.
+        const initialSubtotal = parseFloat("{{ subtotal|default:0 }}");
+        updateProgressBar(initialSubtotal);
+
+        const buttons = document.querySelectorAll('.ajax-cart-btn');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = this.href;
+                const pid = this.dataset.id;
+                const action = this.dataset.action;
+
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        if (data.cart_count === 0) {
+                            location.reload();
+                            return;
+                        }
+
+                        document.getElementById('cart-badge').textContent = data.cart_count;
+                        document.getElementById('summary-subtotal').textContent = Math.round(data.subtotal);
+                        document.getElementById('summary-total').textContent = Math.round(data.total);
+                        
+                        const discountElem = document.getElementById('summary-discount');
+                        if(discountElem) discountElem.textContent = Math.round(data.discount);
+
+                        // Delivery Logic
+                        const deliveryText = document.getElementById('delivery-text');
+                        const deliveryAlert = document.getElementById('delivery-alert');
+                        
+                        if (parseFloat(data.delivery) === 0) {
+                            if (deliveryText) deliveryText.innerHTML = '<span class="text-success"><i class="fas fa-check-circle me-1"></i> Free</span>';
+                            if (deliveryAlert && !document.querySelector('.free-delivery-success')) {
+                                deliveryAlert.className = 'free-delivery-alert free-delivery-success shadow-sm';
+                                deliveryAlert.innerHTML = '<i class="fas fa-check-circle fa-lg me-3"></i><div><strong>Congratulations!</strong> Your order qualifies for Free Delivery.</div>';
+                            }
+                        } else {
+                            if (deliveryText) deliveryText.innerHTML = 'Rs. <span id="summary-delivery">200</span>';
+                            if (deliveryAlert) {
+                                deliveryAlert.className = 'free-delivery-alert shadow-sm';
+                                let shortfall = Math.round(parseFloat(data.shortfall));
+                                deliveryAlert.innerHTML = `<i class="fas fa-truck fa-lg me-3"></i><div class="w-100"><span>Add <strong>Rs. ${shortfall}</strong> more to get <span class="fw-bold text-success">Free Delivery</span>!</span><div class="progress mt-2" style="height: 6px; width: 100%; max-width: 300px;"><div class="progress-bar bg-success" id="progress-bar" role="progressbar" style="width: 0%;"></div></div></div>`;
+                                updateProgressBar(data.subtotal);
+                            }
+                        }
+
+                        if (action === 'remove' || data.item_qty === 0) {
+                            const row = document.getElementById(`row-${pid}`);
+                            if(row) row.remove();
+                        } else {
+                            document.getElementById(`qty-${pid}`).textContent = data.item_qty;
+                            document.getElementById(`item-total-${pid}`).textContent = Math.round(data.item_total);
+                        }
+                        updateProgressBar(data.subtotal);
+                    }
+                });
+            });
+        });
+
+        function updateProgressBar(currentSubtotal) {
+            const bar = document.getElementById('progress-bar');
+            if (bar) {
+                let percent = (currentSubtotal / 2500) * 100;
+                if (percent > 100) percent = 100;
+                bar.style.width = percent + '%';
+            }
+        }
+    });
+</script>
+{% endblock %}

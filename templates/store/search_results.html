@@ -1,0 +1,132 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    /* Same CSS as before */
+    .search-header { background-color: #f9f9f9; padding: 30px 0; border-bottom: 1px solid #eee; margin-bottom: 40px; }
+    .product-card { border: none; border-radius: 15px; transition: all 0.3s ease; background: #fff; overflow: hidden; height: 100%; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
+    .product-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+    .product-img-wrapper { height: 220px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #fff; position: relative; }
+    .product-img-wrapper img { max-height: 100%; max-width: 100%; padding: 15px; transition: transform 0.5s ease; }
+    .product-card:hover .product-img-wrapper img { transform: scale(1.1); }
+    .discount-badge { position: absolute; top: 10px; left: 10px; background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; font-weight: 800; padding: 4px 10px; border-radius: 50px; font-size: 0.7rem; z-index: 5; box-shadow: 0 4px 10px rgba(255, 75, 43, 0.3); }
+    .timer-badge { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); color: #fecb00; font-weight: 700; padding: 4px 8px; border-radius: 8px; font-size: 0.65rem; z-index: 5; border: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; gap: 4px; }
+    .out-of-stock-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.85); display: flex; align-items: center; justify-content: center; z-index: 6; font-weight: 900; color: #dc3545; font-size: 1.1rem; text-transform: uppercase; border: 2px solid #dc3545; margin: 10px; border-radius: 10px; letter-spacing: 1px; }
+    .btn-add-cart { background-color: #006837; color: white; border-radius: 50px; font-weight: 600; padding: 8px 0; transition: 0.2s; width: 100%; border: none; }
+    .btn-add-cart:hover { background-color: #004d29; color: #fff; }
+    .btn-add-cart:disabled { background: #e0e0e0; color: #999; cursor: not-allowed; }
+    .old-price { text-decoration: line-through; color: #aaa; font-size: 0.85rem; font-weight: 500; margin-right: 5px; }
+    .price-tag { color: #006837; font-weight: 800; font-size: 1.1rem; }
+</style>
+
+<div class="search-header text-center">
+    <div class="container">
+        <h2 class="fw-bold mb-2">Search Results</h2>
+        <p class="text-muted mb-0">Found <span class="text-success fw-bold">{{ products|length }}</span> results for "<span class="text-dark fst-italic">{{ query }}</span>"</p>
+    </div>
+</div>
+
+<div class="container mb-5" style="min-height: 50vh;">
+    {% if products %}
+        <div class="row g-4">
+            {% for product in products %}
+            <div class="col-6 col-md-3">
+                <div class="product-card d-flex flex-column">
+                    <a href="{% url 'product_detail' product.id %}" class="product-img-wrapper">
+                        {% if product.stock <= 0 %}
+                            <div class="out-of-stock-overlay">Sold Out</div>
+                        {% endif %}
+
+                        {% if product.stock > 0 and product.is_discount_active %}
+                            <div class="discount-badge" id="badge-{{ product.id }}">-{{ product.discount_percentage }}%</div>
+                            <div class="timer-badge" id="timer-{{ product.id }}" data-endtime="{{ product.discount_end_time|date:'Y-m-d H:i:s' }}">
+                                <i class="fas fa-clock small"></i> <span class="countdown">00:00:00</span>
+                            </div>
+                        {% endif %}
+
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                        {% else %}
+                        <img src="https://via.placeholder.com/200x200?text=No+Image" alt="No Image">
+                        {% endif %}
+                    </a>
+                    
+                    <div class="card-body text-center d-flex flex-column p-3">
+                        <div class="mb-2"><span class="badge bg-light text-dark border">{{ product.category.name }}</span></div>
+                        <h6 class="card-title fw-bold text-dark mb-2" style="font-size: 1rem;"><a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark">{{ product.name }}</a></h6>
+                        
+                        <div class="mt-auto pt-2">
+                            <div class="mb-3" id="price-box-{{ product.id }}">
+                                {% if product.stock > 0 and product.is_discount_active %}
+                                    <span class="old-price">Rs. {{ product.price|floatformat:0 }}</span>
+                                    <span class="price-tag">Rs. {{ product.get_price|floatformat:0 }}</span>
+                                {% else %}
+                                    <span class="price-tag">Rs. {{ product.price|floatformat:0 }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <form action="{% url 'add_to_cart' product.id %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn btn-add-cart shadow-sm" {% if product.stock <= 0 %}disabled{% endif %}>
+                                    {% if product.stock > 0 %}
+                                        Add to Cart <i class="fas fa-shopping-basket ms-1"></i>
+                                    {% else %}
+                                        Sold Out
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <div class="mb-4"><i class="fas fa-search fa-5x text-light bg-secondary p-4 rounded-circle" style="--bs-bg-opacity: .1; color: #aaa !important;"></i></div>
+            <h3 class="fw-bold text-dark">No products found</h3>
+            <p class="text-muted">We couldn't find what you were looking for.</p>
+            <a href="{% url 'home' %}" class="btn btn-outline-success rounded-pill px-4 mt-3 fw-bold">Back to Home</a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const timers = document.querySelectorAll('.timer-badge');
+        timers.forEach(timer => {
+            const pid = timer.id.split('-')[1];
+            const endTimeStr = timer.dataset.endtime;
+            const endTime = new Date(endTimeStr).getTime();
+            const countdownSpan = timer.querySelector('.countdown');
+            function updateTimer() {
+                const now = new Date().getTime();
+                const distance = endTime - now;
+                if (distance < 0) { 
+                    timer.style.display = 'none'; 
+                    const badge = document.getElementById(`badge-${pid}`);
+                    if(badge) badge.style.display = 'none';
+                    const priceBox = document.getElementById(`price-box-${pid}`);
+                    if(priceBox) {
+                        const oldPriceSpan = priceBox.querySelector('.old-price');
+                        if(oldPriceSpan) {
+                            priceBox.innerHTML = `<span class="price-tag">${oldPriceSpan.innerText}</span>`;
+                        }
+                    }
+                    return; 
+                }
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                const h = hours < 10 ? "0" + hours : hours;
+                const m = minutes < 10 ? "0" + minutes : minutes;
+                const s = seconds < 10 ? "0" + seconds : seconds;
+                countdownSpan.innerText = `${h}:${m}:${s}`;
+            }
+            setInterval(updateTimer, 1000);
+            updateTimer();
+        });
+    });
+</script>
+{% endblock %}

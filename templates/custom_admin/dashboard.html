@@ -1,0 +1,134 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<style>
+    .admin-bg { background-color: #f8f9fa; min-height: 100vh; padding: 40px 0; }
+    
+    /* Action Cards (Manage Blocks) */
+    .action-card { 
+        background: #fff; border-radius: 16px; padding: 25px; 
+        text-align: center; transition: 0.3s; text-decoration: none; 
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        color: #444; border: 1px solid #eee; height: 100%; 
+        box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+    }
+    .action-card:hover { 
+        background-color: #006837; color: #fff; border-color: #006837; 
+        transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0, 104, 55, 0.2); 
+    }
+    .action-icon { 
+        font-size: 2rem; margin-bottom: 15px; 
+        width: 60px; height: 60px; background: #f4fdf6; color: #006837;
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        transition: 0.3s;
+    }
+    .action-card:hover .action-icon { background: rgba(255,255,255,0.2); color: #fff; }
+
+    /* Stat Cards */
+    .stat-card { 
+        background: #fff; border-radius: 16px; padding: 20px; border: none; 
+        box-shadow: 0 5px 20px rgba(0,0,0,0.03); transition: 0.3s; height: 100%; 
+        position: relative; overflow: hidden; border-left: 5px solid #006837; 
+        display: block; text-decoration: none; color: #333; 
+    }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+    .stat-icon { font-size: 1.5rem; color: #006837; margin-bottom: 5px; }
+    .stat-value { font-size: 1.8rem; font-weight: 800; color: #222; }
+    .stat-label { color: #888; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+
+    .admin-table-card { background: #fff; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); border: none; margin-top: 30px; overflow: hidden; }
+    .table-header { background: #333; color: #fff; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; }
+</style>
+
+<div class="admin-bg">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div><h2 class="fw-bold text-dark mb-1">Admin Dashboard</h2><p class="text-muted mb-0">Overview of your store's performance</p></div>
+            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill shadow-sm">Superuser Access</span>
+        </div>
+
+        <!-- ACTION BLOCKS (Aligned Vendors Here) -->
+        <div class="row g-3 mb-5">
+            <div class="col-6 col-md-3">
+                <a href="{% url 'admin_products_list' %}" class="action-card">
+                    <div class="action-icon"><i class="fas fa-box-open"></i></div>
+                    <h6 class="fw-bold m-0">Manage Products</h6>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'admin_categories_list' %}" class="action-card">
+                    <div class="action-icon"><i class="fas fa-tags"></i></div>
+                    <h6 class="fw-bold m-0">Manage Categories</h6>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'admin_vendors_list' %}" class="action-card">
+                    <div class="action-icon"><i class="fas fa-store"></i></div>
+                    <h6 class="fw-bold m-0">Manage Vendors</h6>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'admin_users' %}" class="action-card">
+                    <div class="action-icon"><i class="fas fa-users"></i></div>
+                    <h6 class="fw-bold m-0">Manage Users</h6>
+                </a>
+            </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <a href="{% url 'admin_all_orders' %}" class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div><div class="stat-icon"><i class="fas fa-shopping-cart"></i></div><div class="stat-value">{{ total_orders }}</div><div class="stat-label">Total Orders</div></div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card" style="border-color: #fecb00;">
+                    <div class="stat-icon" style="color: #fecb00;"><i class="fas fa-clock"></i></div>
+                    <div class="stat-value">{{ pending_orders }}</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card" style="border-color: #2196f3;">
+                    <div class="stat-icon" style="color: #1565c0;"><i class="fas fa-wallet"></i></div>
+                    <div class="stat-value">Rs. {{ total_revenue|floatformat:0 }}</div>
+                    <div class="stat-label">Revenue</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'admin_vendors_list' %}" class="stat-card" style="border-color: #9c27b0;">
+                    <div class="stat-icon" style="color: #7b1fa2;"><i class="fas fa-handshake"></i></div>
+                    <div class="stat-value">{{ total_vendors }}</div>
+                    <div class="stat-label">Active Vendors</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Orders Table -->
+        <div class="admin-table-card">
+            <div class="table-header"><h5 class="m-0 fw-bold">Recent Orders</h5><small class="text-white-50">Last 5 transactions</small></div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="bg-light">
+                        <tr><th class="p-3 text-muted">ID</th><th class="text-muted">Customer</th><th class="text-muted">Amount</th><th class="text-muted">Status</th><th class="text-muted text-end">Action</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recent_orders %}
+                        <tr>
+                            <td class="p-3 fw-bold text-dark">#{{ order.id }}</td>
+                            <td>{{ order.first_name }} {{ order.last_name }}</td>
+                            <td class="fw-bold text-success">Rs. {{ order.total_amount|floatformat:0 }}</td>
+                            <td>{% if order.status == 'Pending' %}<span class="badge bg-warning text-dark rounded-pill px-3">Pending</span>{% elif order.status == 'Delivered' %}<span class=\"badge bg-success rounded-pill px-3\">Delivered</span>{% else %}<span class="badge bg-secondary rounded-pill px-3">{{ order.status }}</span>{% endif %}</td>
+                            <td class="text-end p-3"><a href="{% url 'admin_order_detail' order.id %}" class="btn btn-sm btn-outline-dark rounded-pill px-3">Manage</a></td>
+                        </tr>
+                        {% empty %}<tr><td colspan="5" class="text-center py-5 text-muted">No orders found yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

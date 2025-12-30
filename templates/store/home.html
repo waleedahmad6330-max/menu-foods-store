@@ -1,0 +1,183 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Same styles as before */
+    #heroCarousel { position: relative; height: 500px; overflow: hidden; border-radius: 0 0 30px 30px; }
+    .carousel-item { height: 500px; }
+    .carousel-item img { height: 100%; width: 100%; object-fit: cover; filter: brightness(0.55); }
+    .hero-overlay-content { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; z-index: 10; color: white; padding: 20px; }
+    .carousel-indicators { bottom: 30px; }
+    .carousel-indicators button { width: 12px !important; height: 12px !important; border-radius: 50%; background-color: rgba(255, 255, 255, 0.5) !important; border: 2px solid transparent !important; margin: 0 6px !important; transition: all 0.3s ease; }
+    .carousel-indicators button.active { background-color: #fecb00 !important; transform: scale(1.3); opacity: 1; }
+    @media (max-width: 768px) { #heroCarousel, .carousel-item { height: 350px; } .display-3 { font-size: 2rem; } .lead { font-size: 1rem; } .product-img-wrapper { height: 160px !important; } .product-img-wrapper img { padding: 10px; } .btn-add-cart { font-size: 0.8rem; padding: 8px 0; } .card-body { padding: 15px !important; } .card-title { font-size: 0.95rem !important; } .price-tag { font-size: 1rem !important; } }
+    .section-title { color: #006837; font-weight: 800; text-transform: uppercase; letter-spacing: -0.5px; }
+    .product-card { border: none; border-radius: 20px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); background: #fff; overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
+    .product-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0, 104, 55, 0.15); }
+    .product-img-wrapper { height: 220px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #fff; position: relative; }
+    .product-img-wrapper img { max-height: 90%; max-width: 90%; transition: transform 0.6s ease; }
+    .product-card:hover .product-img-wrapper img { transform: scale(1.08); }
+    .discount-badge { position: absolute; top: 15px; left: 15px; background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; font-weight: 800; padding: 5px 12px; border-radius: 50px; font-size: 0.75rem; z-index: 5; box-shadow: 0 4px 10px rgba(255, 75, 43, 0.3); }
+    .timer-badge { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); color: #fecb00; font-weight: 700; padding: 5px 10px; border-radius: 8px; font-size: 0.7rem; z-index: 5; border: 1px solid rgba(255, 255, 255, 0.1); }
+    .out-of-stock-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.85); display: flex; align-items: center; justify-content: center; z-index: 6; font-weight: 900; color: #dc3545; font-size: 1.2rem; text-transform: uppercase; border: 2px solid #dc3545; margin: 10px; border-radius: 15px; letter-spacing: 1px; }
+    .price-tag { color: #006837; font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .old-price { text-decoration: line-through; color: #aaa; font-size: 0.9rem; font-weight: 500; }
+    .btn-add-cart { background: linear-gradient(135deg, #006837 0%, #004d29 100%); color: white; border-radius: 50px; font-weight: 700; padding: 10px 20px; transition: 0.3s; width: 100%; border: none; box-shadow: 0 5px 15px rgba(0, 104, 55, 0.2); }
+    .btn-add-cart:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 104, 55, 0.3); color: #fff; }
+    .btn-add-cart:disabled { background: #e0e0e0; color: #999; cursor: not-allowed; box-shadow: none; transform: none; }
+    .feature-card { padding: 20px; border-radius: 15px; background: white; border: 1px solid #f0f0f0; height: 100%; transition: 0.3s; }
+    .feature-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); border-color: #fecb00; }
+</style>
+
+<!-- HERO -->
+<div class="position-relative mb-5">
+    <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item active"><img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1" alt="Cooking"></div>
+            <div class="carousel-item"><img src="https://images.unsplash.com/photo-1547592180-85f173990554" alt="Family"></div>
+            <div class="carousel-item"><img src="https://images.unsplash.com/photo-1606787366850-de6330128bfc" alt="Food"></div>
+        </div>
+    </div>
+    <div class="hero-overlay-content">
+        <h1 class="display-3 fw-bold text-shadow mb-3">MOTHERS KI NO.1 CHOICE</h1>
+        <p class="lead mb-4 fw-bold text-warning text-shadow" style="letter-spacing: 1px;">Healthy, Delicious, and Fresh Frozen Foods.</p>
+        <a href="#featured" class="btn btn-warning btn-lg rounded-pill px-5 fw-bold shadow hover-scale text-dark">Shop Now</a>
+    </div>
+</div>
+
+<!-- FEATURES -->
+<div class="container mb-5">
+    <div class="row text-center g-3">
+        <div class="col-6 col-md-3"><div class="feature-card"><i class="fas fa-shipping-fast fa-2x text-success mb-3"></i><h6 class="fw-bold m-0">Fast Delivery</h6></div></div>
+        <div class="col-6 col-md-3"><div class="feature-card"><i class="fas fa-snowflake fa-2x text-info mb-3"></i><h6 class="fw-bold m-0">Always Frozen</h6></div></div>
+        <div class="col-6 col-md-3"><div class="feature-card"><i class="fas fa-check-circle fa-2x text-warning mb-3"></i><h6 class="fw-bold m-0">Halal Certified</h6></div></div>
+        <div class="col-6 col-md-3"><div class="feature-card"><i class="fas fa-headset fa-2x text-primary mb-3"></i><h6 class="fw-bold m-0">24/7 Support</h6></div></div>
+    </div>
+</div>
+
+<!-- PRODUCTS -->
+<div class="container pb-5" id="featured">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="section-title m-0">Best Sellers</h3>
+        <a href="#" class="text-decoration-none text-muted small fw-bold hover-green">View All <i class="fas fa-arrow-right ms-1"></i></a>
+    </div>
+
+    <div class="row g-4">
+        {% for product in products %}
+        <div class="col-6 col-md-3">
+            <div class="product-card h-100" id="product-card-{{ product.id }}">
+                <a href="{% url 'product_detail' product.id %}" class="product-img-wrapper">
+                    
+                    {% if product.stock <= 0 %}
+                        <div class="out-of-stock-overlay">Sold Out</div>
+                    {% endif %}
+
+                    <!-- DISCOUNT UI -->
+                    {% if product.stock > 0 and product.is_discount_active %}
+                        <div class="discount-badge" id="badge-{{ product.id }}">-{{ product.discount_percentage }}%</div>
+                        <div class="timer-badge" id="timer-{{ product.id }}" data-endtime="{{ product.discount_end_time|date:'Y-m-d H:i:s' }}">
+                            <i class="fas fa-clock small me-1"></i><span class="countdown">00:00:00</span>
+                        </div>
+                    {% endif %}
+
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    {% else %}
+                        <img src="https://via.placeholder.com/200x200?text=No+Image" alt="No Image">
+                    {% endif %}
+                </a>
+                
+                <div class="card-body text-center d-flex flex-column p-4">
+                    <div class="mb-2"><span class="badge bg-light text-dark border rounded-pill px-3" style="font-size: 0.7rem; font-weight: 600;">{{ product.category.name|default:"General" }}</span></div>
+                    <h5 class="card-title fw-bold text-dark text-truncate w-100 mb-3"><a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark">{{ product.name }}</a></h5>
+                    
+                    <div class="mt-auto">
+                        <!-- PRICE DISPLAY -->
+                        <div id="price-box-{{ product.id }}">
+                            {% if product.stock > 0 and product.is_discount_active %}
+                                <p class="price-tag mb-3">
+                                    <span class="old-price">Rs. {{ product.price|floatformat:0 }}</span>
+                                    <span class="current-price">Rs. {{ product.get_price|floatformat:0 }}</span>
+                                </p>
+                            {% else %}
+                                <p class="price-tag mb-3">Rs. {{ product.price|floatformat:0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <form action="{% url 'add_to_cart' product.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-add-cart" {% if product.stock <= 0 %}disabled{% endif %}>
+                                {% if product.stock > 0 %}
+                                    Add to Cart <i class="fas fa-cart-plus ms-1"></i>
+                                {% else %}
+                                    Sold Out <i class="fas fa-ban ms-1"></i>
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const timers = document.querySelectorAll('.timer-badge');
+        
+        timers.forEach(timer => {
+            const pid = timer.id.split('-')[1]; // Extract Product ID
+            const endTimeStr = timer.dataset.endtime;
+            const endTime = new Date(endTimeStr).getTime();
+            const countdownSpan = timer.querySelector('.countdown');
+
+            function updateTimer() {
+                const now = new Date().getTime();
+                const distance = endTime - now;
+
+                if (distance < 0) {
+                    // TIME EXPIRED LOGIC
+                    timer.style.display = 'none'; // Hide Timer
+                    
+                    // Hide Discount Badge
+                    const badge = document.getElementById(`badge-${pid}`);
+                    if(badge) badge.style.display = 'none';
+
+                    // Revert Price to Original
+                    const priceBox = document.getElementById(`price-box-${pid}`);
+                    if(priceBox) {
+                        // Find the original price hidden in old-price or fetch it
+                        // Since old-price contains the original, we will just show that and hide current
+                        const oldPriceSpan = priceBox.querySelector('.old-price');
+                        if(oldPriceSpan) {
+                            const originalPriceText = oldPriceSpan.innerText; // e.g. "Rs. 500"
+                            priceBox.innerHTML = `<p class="price-tag mb-3">${originalPriceText}</p>`;
+                        }
+                    }
+                    return;
+                }
+
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                const h = hours < 10 ? "0" + hours : hours;
+                const m = minutes < 10 ? "0" + minutes : minutes;
+                const s = seconds < 10 ? "0" + seconds : seconds;
+
+                countdownSpan.innerText = `${h}:${m}:${s}`;
+            }
+
+            setInterval(updateTimer, 1000);
+            updateTimer();
+        });
+    });
+</script>
+{% endblock %}

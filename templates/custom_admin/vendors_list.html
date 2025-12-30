@@ -1,0 +1,69 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<style>
+    .admin-bg { background-color: #f8f9fa; min-height: 100vh; padding: 40px 0; }
+    .manager-card { background: #fff; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); overflow: hidden; border: none; }
+    .table-header { background-color: #006837; color: #fff; padding: 15px; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
+    .table-header th { padding: 18px; border: none; font-weight: 600; }
+    .table-row td { padding: 15px 18px; vertical-align: middle; border-bottom: 1px solid #f9f9f9; color: #555; font-size: 0.95rem; }
+    .table-row:hover { background-color: #f9fffb; }
+    .btn-add-new { background-color: #fecb00; color: #000; border: none; padding: 10px 25px; border-radius: 50px; font-weight: 700; transition: 0.3s; text-decoration: none; }
+    .btn-add-new:hover { background-color: #e5b700; color: #000; transform: translateY(-2px); }
+    
+    .prod-pill { font-size: 0.75rem; background: #e8f5e9; color: #006837; padding: 4px 10px; border-radius: 20px; display: inline-block; margin: 2px; border: 1px solid #c8e6c9; }
+</style>
+
+<div class="admin-bg">
+    <div class="container">
+        
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <a href="{% url 'admin_dashboard' %}" class="text-decoration-none text-muted fw-bold small mb-1 d-block hover-link"><i class="fas fa-arrow-left me-1"></i> Dashboard</a>
+                <h2 class="fw-bold text-dark m-0">Manage Vendors</h2>
+            </div>
+            <a href="{% url 'admin_add_vendor' %}" class="btn-add-new"><i class="fas fa-plus me-2"></i> Add Vendor</a>
+        </div>
+
+        <div class="manager-card">
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead class="table-header">
+                        <tr>
+                            <th class="ps-4">Vendor Name</th>
+                            <th>Phone / Address</th>
+                            <th>Products Purchased (Qty)</th>
+                            <th class="text-end pe-4">Total Items</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for v in vendors %}
+                        <tr class="table-row">
+                            <td class="ps-4 fw-bold text-dark">{{ v.name }}</td>
+                            <td>
+                                <div class="small fw-bold">{{ v.phone }}</div>
+                                <div class="small text-muted text-truncate" style="max-width: 150px;">{{ v.address }}</div>
+                            </td>
+                            <td>
+                                <!-- Loop through transactions to show product names and qty -->
+                                {% for tx in v.transactions.all %}
+                                    <span class="prod-pill">{{ tx.product.name }} ({{ tx.quantity }})</span>
+                                {% empty %}
+                                    <span class="text-muted small">-</span>
+                                {% endfor %}
+                            </td>
+                            <td class="text-end pe-4 fw-bold text-success">{{ v.total_products_bought }}</td>
+                            <td class="text-end pe-4">
+                                <a href="{% url 'admin_vendor_detail' v.id %}" class="btn btn-sm btn-outline-dark rounded-pill px-3">Manage</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center py-5 text-muted">No Vendors Found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

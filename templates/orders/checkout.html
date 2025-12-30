@@ -1,0 +1,88 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+   
+    body { background-color: #f8f9fa; } .checkout-container { padding-top: 50px; padding-bottom: 80px; } .checkout-card { background: #fff; border-radius: 16px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02); height: 100%; } .clean-input { background-color: #fcfcfc; border: 1px solid #e0e0e0; border-radius: 10px; padding: 14px 18px; font-size: 0.95rem; transition: 0.3s; } .clean-input:focus { background-color: #fff; border-color: #006837; box-shadow: 0 0 0 4px rgba(0, 104, 55, 0.1); outline: none; } .form-label { font-size: 0.85rem; font-weight: 600; color: #666; margin-bottom: 8px; margin-left: 2px; } .summary-wrapper { position: sticky; top: 100px; } .order-row { display: flex; justify-content: space-between; margin-bottom: 15px; color: #555; font-size: 0.95rem; } .discount-row { background-color: #f0fdf4; color: #166534; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; border: 1px solid #dcfce7; } .total-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 25px; padding-top: 25px; border-top: 2px dashed #eee; } .payment-box { border: 2px solid #f1f1f1; border-radius: 12px; padding: 15px; margin-bottom: 12px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: space-between; } .payment-box:hover { border-color: #006837; background-color: #f9fffb; } .payment-box input[type="radio"] { accent-color: #006837; transform: scale(1.2); } .payment-box:has(input:checked) { border-color: #006837; background-color: #f0fdf4; box-shadow: 0 4px 12px rgba(0, 104, 55, 0.1); } .btn-pay { background: linear-gradient(135deg, #006837 0%, #004d29 100%); color: white; border: none; border-radius: 12px; padding: 18px; font-weight: 700; font-size: 1.1rem; width: 100%; margin-top: 25px; transition: 0.3s; box-shadow: 0 5px 20px rgba(0, 104, 55, 0.25); display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer; } .btn-pay:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0, 104, 55, 0.35); color: white; }
+</style>
+
+<div class="checkout-container">
+    <div class="container">
+        {% if error %}<div class="alert alert-danger shadow-sm border-0 rounded-3 mb-4"><strong>Payment Failed:</strong> {{ error }}</div>{% endif %}
+
+        <div class="mb-5 text-center">
+            <span class="text-muted small">Cart <i class="fas fa-chevron-right mx-2 text-muted" style="font-size: 10px;"></i></span>
+            <span class="fw-bold text-dark">Checkout</span>
+            <span class="text-muted small"><i class="fas fa-chevron-right mx-2 text-muted" style="font-size: 10px;"></i> Payment</span>
+        </div>
+
+        <form action="{% url 'checkout' %}" method="POST">
+            {% csrf_token %}
+            <div class="row g-5">
+                <div class="col-lg-7">
+                    <div class="checkout-card">
+                       
+                        <div class="mb-5">
+                            <h3 class="section-title"><i class="far fa-user me-2 text-success"></i> Contact Info</h3>
+                            <div class="row g-4">
+                                <div class="col-12"><label class="form-label">Email Address <span class="text-muted small fw-normal">(Optional)</span></label><input type="email" name="email" class="form-control clean-input" value="{{ user.email|default:'' }}" placeholder="you@example.com"></div>
+                                <div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" checked id="newsCheck"><label class="form-check-label small text-muted" for="newsCheck">Keep me updated with exclusive offers</label></div></div>
+                            </div>
+                        </div>
+                        <hr class="my-5 opacity-10">
+                        <div>
+                            <h3 class="section-title"><i class="fas fa-shipping-fast me-2 text-success"></i> Shipping Address</h3>
+                            <div class="row g-4">
+                                <div class="col-md-6"><label class="form-label">First Name</label><input type="text" name="first_name" class="form-control clean-input" value="{{ user.first_name|default:'' }}" placeholder="e.g. Ali" required></div>
+                                <div class="col-md-6"><label class="form-label">Last Name <span class="text-muted small fw-normal">(Optional)</span></label><input type="text" name="last_name" class="form-control clean-input" value="{{ user.last_name|default:'' }}" placeholder="e.g. Khan"></div>
+                                <div class="col-12"><label class="form-label">Complete Address</label><input type="text" name="address" class="form-control clean-input" placeholder="House No, Street, Area" required></div>
+                                <div class="col-md-5"><label class="form-label">City</label><input type="text" name="city" class="form-control clean-input" placeholder="e.g. Lahore" required></div>
+                                <div class="col-md-7"><label class="form-label">Phone Number</label><input type="tel" name="phone" id="phoneInput" class="form-control clean-input" value="{{ user.membership.phone|default:'' }}" placeholder="0300-1234567" maxlength="12" required></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="summary-wrapper">
+                        <div class="checkout-card bg-white">
+                            <h4 class="fw-bold mb-4 text-dark">Order Summary</h4>
+                            
+                            <div class="order-row"><span>Subtotal</span><span class="fw-bold">Rs. {{ total|floatformat:0 }}</span></div>
+                            
+                            {% if is_member %}
+                            <div class="discount-row"><span><i class="fas fa-crown me-2"></i> Member Discount</span><span>- Rs. {{ discount|floatformat:0 }}</span></div>
+                            {% endif %}
+
+                            <div class="order-row">
+                                <span>Delivery Charge</span>
+                                {% if delivery_fee == 0 %}<span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i> Free</span>
+                                {% else %}<span class="fw-bold">Rs. {{ delivery_fee|floatformat:0 }}</span>{% endif %}
+                            </div>
+
+                            <!-- FIXED PRICES HERE -->
+                            <div class="total-row mb-4"><span class="h5 fw-bold text-dark mb-0">Total to Pay</span><span class="h3 fw-bold text-danger mb-0">Rs. {{ grand_total|floatformat:0 }}</span></div>
+
+                            <h6 class="text-muted small fw-bold text-uppercase mb-3">Select Payment Method</h6>
+                            <label class="payment-box" for="cod">
+                                <div class="d-flex align-items-center"><input type="radio" name="payment_method" id="cod" value="cod" checked><span class="ms-3 fw-bold text-dark">Cash on Delivery</span></div><i class="fas fa-truck text-muted"></i>
+                            </label>
+                            <label class="payment-box" for="stripe">
+                                <div class="d-flex align-items-center"><input type="radio" name="payment_method" id="stripe" value="stripe"><span class="ms-3 fw-bold text-dark">Pay Online</span></div><div><i class="fab fa-cc-visa text-muted me-1"></i><i class="fab fa-cc-mastercard text-muted"></i></div>
+                            </label>
+
+                            {% if not is_member %}
+                            <div class="alert alert-warning mt-3 mb-0 small border-0 rounded-3"><i class="fas fa-gift me-2"></i> Join Membership for <strong>Free Delivery</strong> & <strong>10% OFF</strong>! <a href="{% url 'membership' %}" class="fw-bold text-dark text-decoration-underline">Join Now</a></div>
+                            {% endif %}
+
+                            <button type="submit" class="btn-pay"><span>Place Order</span><i class="fas fa-arrow-right ms-2 small"></i></button>
+                            <div class="text-center mt-4 opacity-50"><i class="fas fa-lock me-1"></i> SSL Secure Transaction</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>document.addEventListener('DOMContentLoaded',function(){const e=document.getElementById('phoneInput');e.addEventListener('input',function(t){let n=t.target.value.replace(/\D/g,'');n.length>11&&(n=n.slice(0,11)),n.length>4&&(n=n.slice(0,4)+'-'+n.slice(4)),t.target.value=n})});</script>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    /* Success Animation */
+    .success-icon-wrapper {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #006837 0%, #004d29 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+        box-shadow: 0 10px 25px rgba(0, 104, 55, 0.3);
+        animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    
+    @keyframes popIn {
+        0% { transform: scale(0); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.05);
+        background: #fff;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .receipt-line {
+        border-top: 2px dashed #eee;
+        margin: 25px 0;
+        position: relative;
+    }
+    .receipt-line::before, .receipt-line::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: #f8f9fa; /* Match body bg */
+        border-radius: 50%;
+        top: -10px;
+    }
+    .receipt-line::before { left: -45px; }
+    .receipt-line::after { right: -45px; }
+
+    .btn-home {
+        background-color: #fecb00;
+        color: #000;
+        font-weight: 700;
+        border: none;
+        padding: 15px;
+        border-radius: 50px;
+        width: 100%;
+        transition: 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-decoration: none;
+        display: block;
+    }
+    .btn-home:hover {
+        background-color: #e5b700;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(254, 203, 0, 0.2);
+        color: #000;
+    }
+</style>
+
+<div class="container py-5" style="min-height: 85vh; display: flex; align-items: center; justify-content: center;">
+    <div class="card success-card p-5 text-center" style="max-width: 500px; width: 100%;">
+        
+        <div class="success-icon-wrapper">
+            <i class="fas fa-check fa-3x text-white"></i>
+        </div>
+        
+        <h2 class="fw-bold text-dark mb-2">Order Confirmed!</h2>
+        <p class="text-muted mb-4">Yay! Your order has been placed successfully.</p>
+
+        <div class="bg-light p-4 rounded-3 text-start mb-4">
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted small text-uppercase fw-bold">Status</span>
+                <span class="badge bg-success rounded-pill px-3">Processing</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span class="text-muted small text-uppercase fw-bold">Date</span>
+                <span class="text-dark small fw-bold">{% now "d M, Y" %}</span>
+            </div>
+        </div>
+        
+        <div class="receipt-line"></div>
+
+       
+        <p class="small text-muted mb-4">
+            We have received your order details. You can track the real-time status of your delivery in the <a href="{% url 'my_orders' %}" class="fw-bold text-dark text-decoration-underline">My Orders</a> section.
+        </p>
+
+        <a href="{% url 'home' %}" class="btn btn-home shadow-sm">
+            Continue Shopping <i class="fas fa-arrow-right ms-2"></i>
+        </a>
+    </div>
+</div>
+{% endblock %}

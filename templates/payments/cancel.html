@@ -1,0 +1,87 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    .cancel-icon-wrapper {
+        width: 90px;
+        height: 90px;
+        background-color: #fff5f5;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 25px;
+        animation: shake 0.5s ease-in-out;
+    }
+    
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    .cancel-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.05);
+        background: #fff;
+    }
+
+    .btn-retry {
+        background-color: #333;
+        color: #fff;
+        font-weight: 600;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        transition: 0.3s;
+        width: 100%;
+    }
+    .btn-retry:hover {
+        background-color: #000;
+        transform: translateY(-2px);
+    }
+    
+    .btn-back {
+        background-color: transparent;
+        color: #777;
+        font-weight: 600;
+        border: 2px solid #eee;
+        padding: 12px 30px;
+        border-radius: 50px;
+        transition: 0.3s;
+        width: 100%;
+    }
+    .btn-back:hover {
+        border-color: #ccc;
+        color: #333;
+    }
+</style>
+
+<div class="container py-5" style="min-height: 85vh; display: flex; align-items: center; justify-content: center;">
+    <div class="card cancel-card p-5 text-center" style="max-width: 450px; width: 100%;">
+        
+        <div class="cancel-icon-wrapper">
+            <i class="fas fa-times fa-2x text-danger"></i>
+        </div>
+        
+        <h3 class="fw-bold text-dark mb-2">Payment Failed</h3>
+        <p class="text-muted mb-4">
+            Oops! It seems the transaction was declined or cancelled. Don't worry, no charges were made.
+        </p>
+
+        <div class="d-grid gap-3">
+            <a href="{% url 'checkout' %}" class="btn btn-retry shadow-sm">
+                <i class="fas fa-redo-alt me-2"></i> Try Payment Again
+            </a>
+            <a href="{% url 'home' %}" class="btn btn-back">
+                Return to Shop
+            </a>
+        </div>
+        
+        <div class="mt-4 pt-3 border-top">
+            <p class="small text-muted mb-0">Need help? <a href="#" class="text-dark fw-bold">Contact Support</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

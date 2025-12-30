@@ -1,0 +1,110 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<style>
+    .admin-form-container { background: #f8f9fa; padding: 60px 0; }
+    .form-card { background: #fff; border-radius: 24px; padding: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.08); position: relative; overflow: hidden; max-width: 900px; margin: 0 auto; }
+    .top-accent { position: absolute; top: 0; left: 0; right: 0; height: 8px; background: #fecb00; border-radius: 24px 24px 0 0; }
+    .clean-input { background-color: #fcfcfc; border: 2px solid #f0f0f0; border-radius: 12px; padding: 12px; width: 100%; transition: 0.3s; }
+    .clean-input:focus { border-color: #fecb00; background-color: #fff; outline: none; }
+    .btn-submit { background: linear-gradient(135deg, #006837 0%, #004d29 100%); color: white; border: none; padding: 16px; border-radius: 50px; width: 100%; font-weight: 800; margin-top: 20px; transition: 0.3s; }
+    .section-divider { border-top: 2px dashed #eee; margin: 30px 0; }
+    .info-label { font-weight: 700; color: #555; margin-bottom: 10px; display: block; }
+</style>
+
+<div class="admin-form-container">
+    <div class="container">
+        <a href="{% url 'admin_products_list' %}" class="text-decoration-none text-muted fw-bold mb-4 d-inline-block"><i class="fas fa-arrow-left me-2"></i> Back</a>
+
+        <div class="form-card">
+            <div class="top-accent"></div>
+            <h3 class="fw-bold text-dark mb-4">Edit Product</h3>
+            
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="info-label">Product Name</label>
+                        <input type="text" name="name" class="form-control clean-input" value="{{ product.name }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="info-label">Price</label>
+                        <input type="number" name="price" class="form-control clean-input" value="{{ product.price }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="info-label">Stock</label>
+                        <input type="number" name="stock" class="form-control clean-input" value="{{ product.stock }}" required>
+                    </div>
+
+                    <!-- Discount Section -->
+                    <div class="col-12"><div class="p-3 rounded bg-light border">
+                        <div class="row g-3">
+                            <div class="col-md-5">
+                                <label class="small fw-bold">Discount %</label>
+                                <input type="number" name="discount_percentage" class="form-control clean-input" value="{{ product.discount_percentage }}" min="0" max="100">
+                            </div>
+                            <div class="col-md-5">
+                                <label class="small fw-bold">End Time</label>
+                                <input type="datetime-local" name="discount_end_time" class="form-control clean-input" value="{{ product.discount_end_time|date:'Y-m-d\TH:i' }}">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="clear_timer" id="ct">
+                                    <label class="form-check-label small" for="ct">Clear</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div></div>
+
+                    <div class="col-12">
+                        <label class="info-label">Categories</label>
+                        <select name="categories" class="form-select clean-input" multiple required style="height: 120px;">
+                            {% for parent in categories %}
+                                {% if not parent.parents.exists %}
+                                    <optgroup label="{{ parent.name|upper }}">
+                                        {% for child in parent.children.all %}
+                                            <option value="{{ child.id }}" {% if child in product.categories.all %}selected{% endif %}>&nbsp;&nbsp;&#10004; {{ child.name }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- DETAILED INFO BLOCKS -->
+                    <div class="col-12 section-divider"></div>
+                    
+                    <div class="col-12">
+                        <label class="info-label">Description</label>
+                        <textarea name="description" class="form-control clean-input" rows="4">{{ product.description }}</textarea>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="info-label">Ingredients</label>
+                        <textarea name="ingredients" class="form-control clean-input" rows="5">{{ product.ingredients }}</textarea>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="info-label">How to Use</label>
+                        <textarea name="how_to_use" class="form-control clean-input" rows="5">{{ product.how_to_use }}</textarea>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="info-label">Shipping Info</label>
+                        <textarea name="shipping_info" class="form-control clean-input" rows="5">{{ product.shipping_info }}</textarea>
+                    </div>
+
+                    <div class="col-12 section-divider"></div>
+
+                    <div class="col-12">
+                        <label class="info-label">Product Image</label>
+                        {% if product.image %}
+                        <div class="mb-2"><img src="{{ product.image.url }}" width="80" class="border rounded p-1"></div>
+                        {% endif %}
+                        <input type="file" name="image" class="form-control clean-input">
+                    </div>
+
+                    <div class="col-12"><button type="submit" class="btn-submit">UPDATE PRODUCT</button></div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

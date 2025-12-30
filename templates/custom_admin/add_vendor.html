@@ -1,0 +1,88 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    .admin-form-container { background: #f8f9fa; min-height: 90vh; padding: 60px 0; }
+    
+    .form-card { 
+        background: #fff; 
+        border-radius: 24px; 
+        box-shadow: 0 20px 50px rgba(0,0,0,0.08); 
+        padding: 40px; 
+        max-width: 550px; 
+        margin: 0 auto; 
+        position: relative;
+        overflow: hidden; 
+    }
+
+    .top-accent {
+        position: absolute; top: 0; left: 0; right: 0;
+        height: 8px; background: #006837;
+        border-radius: 24px 24px 0 0;
+    }
+
+    .form-header { text-align: center; margin-bottom: 35px; margin-top: 10px; }
+    .form-header h3 { font-weight: 800; color: #006837; }
+    .form-header::after {
+        content: ''; display: block; width: 60px; height: 5px;
+        background: #fecb00; margin: 10px auto 0; border-radius: 50px;
+    }
+
+    .clean-input { 
+        background-color: #fcfcfc; border: 2px solid #f0f0f0; 
+        border-radius: 12px; padding: 14px; width: 100%; 
+        transition: 0.3s; 
+    }
+    .clean-input:focus { border-color: #006837; background-color: #fff; outline: none; }
+    
+    .label-custom { font-weight: 700; font-size: 0.75rem; color: #666; text-transform: uppercase; margin-bottom: 8px; display: block; }
+
+    .btn-save { 
+        background: linear-gradient(135deg, #006837, #004d29);
+        color: #fff; border: none; padding: 16px; 
+        border-radius: 50px; width: 100%; font-weight: 800; 
+        margin-top: 20px; transition: 0.3s; 
+        box-shadow: 0 10px 20px rgba(0, 104, 55, 0.2);
+    }
+    .btn-save:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 104, 55, 0.3); color: white; }
+</style>
+
+<div class="admin-form-container">
+    <div class="container">
+        <a href="{% url 'admin_vendors_list' %}" class="text-decoration-none text-muted fw-bold mb-4 d-inline-block hover-green">
+            <i class="fas fa-arrow-left me-2"></i> Back to List
+        </a>
+
+        <div class="form-card">
+            <div class="top-accent"></div>
+            
+            <div class="form-header">
+                <div style="width: 60px; height: 60px; background: #e8f5e9; color: #006837; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                    <i class="fas fa-user-tie fa-lg"></i>
+                </div>
+                <h3>New Vendor</h3>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="label-custom">Vendor Name</label>
+                    <input type="text" name="name" class="form-control clean-input" placeholder="e.g. Metro Cash & Carry" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="label-custom">Phone Number</label>
+                    <input type="text" name="phone" class="form-control clean-input" placeholder="e.g. 0300-1234567" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="label-custom">Address</label>
+                    <textarea name="address" class="form-control clean-input" rows="3" placeholder="Full Address..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-save">CREATE VENDOR PROFILE</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

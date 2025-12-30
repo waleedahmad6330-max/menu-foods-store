@@ -1,0 +1,107 @@
+{% extends "store/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<style>
+    .auth-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+    }
+
+    .auth-card {
+        background: #fff;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        max-width: 450px;
+        width: 100%;
+        text-align: center;
+        overflow: hidden;
+        padding: 40px;
+        position: relative;
+    }
+
+    /* Top Decoration Line */
+    .auth-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #4285F4, #34A853, #FBBC05, #EA4335); /* Google Colors */
+    }
+
+    .google-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        background-color: #fff;
+        border-radius: 50%;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 25px;
+        border: 1px solid #f0f0f0;
+    }
+
+    .btn-continue {
+        background-color: #1a73e8;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        width: 100%;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .btn-continue:hover {
+        background-color: #1557b0;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(26, 115, 232, 0.3);
+        color: white;
+    }
+
+    .btn-cancel {
+        color: #777;
+        font-weight: 500;
+        text-decoration: none;
+        margin-top: 20px;
+        display: inline-block;
+        font-size: 0.9rem;
+    }
+    .btn-cancel:hover { color: #333; }
+</style>
+
+<div class="auth-container">
+    <div class="auth-card">
+        
+        <!-- Animated Google Logo -->
+        <div class="google-icon-wrapper">
+            <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google">
+        </div>
+
+        <h3 class="fw-bold mb-2">{% trans "Sign In via Google" %}</h3>
+        
+        <p class="text-muted mb-4 small">
+            {% trans "You are about to connect your Google account to Menu Foods. Click continue to proceed." %}
+        </p>
+
+        <!-- Configuration Form (Standard Allauth) -->
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-continue">
+                {% trans "Continue" %} <i class="fas fa-arrow-right small"></i>
+            </button>
+        </form>
+
+        <a href="{% url 'login' %}" class="btn-cancel">Cancel and go back</a>
+    </div>
+</div>
+{% endblock %}

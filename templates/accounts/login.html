@@ -1,0 +1,93 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    .auth-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    .auth-header {
+        background: linear-gradient(135deg, #006837 0%, #004d29 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+    .clean-input {
+        background-color: #f8f9fa;
+        border: 1px solid #eee;
+        padding: 12px 15px;
+        border-radius: 10px;
+        transition: 0.3s;
+    }
+    .clean-input:focus {
+        background-color: #fff;
+        border-color: #006837;
+        box-shadow: 0 0 0 3px rgba(0, 104, 55, 0.1);
+    }
+    .btn-auth {
+        background-color: #fecb00; /* Menu Yellow */
+        color: #000;
+        font-weight: 700;
+        border: none;
+        padding: 12px;
+        border-radius: 50px;
+        width: 100%;
+        transition: 0.3s;
+    }
+    .btn-auth:hover {
+        background-color: #e5b700;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(254, 203, 0, 0.3);
+    }
+</style>
+
+<div class="container py-5" style="min-height: 80vh; display: flex; align-items: center;">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-5 col-lg-4">
+            <div class="card auth-card">
+                
+                <div class="auth-header">
+                    <h3 class="fw-bold mb-0">Welcome Back!</h3>
+                    <p class="small mb-0 opacity-75">Please login to continue</p>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    
+                    <!-- Display Messages (Errors) -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show small" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-muted">Username</label>
+                            <input type="text" name="username" class="form-control clean-input" placeholder="Enter your username" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-muted">Password</label>
+                            <input type="password" name="password" class="form-control clean-input" placeholder="Enter your password" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-auth mb-4">
+                            LOGIN NOW <i class="fas fa-sign-in-alt ms-2"></i>
+                        </button>
+                    </form>
+
+                    <div class="text-center border-top pt-4">
+                        <p class="small text-muted mb-0">Don't have an account?</p>
+                        <a href="{% url 'register' %}" class="text-success fw-bold text-decoration-none">Create New Account</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

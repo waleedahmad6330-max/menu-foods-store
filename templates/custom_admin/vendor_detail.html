@@ -1,0 +1,147 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    .admin-bg { background-color: #f8f9fa; min-height: 100vh; padding: 60px 0; }
+    
+    .profile-card {
+        background: #fff; border-radius: 20px; padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center;
+        border-top: 6px solid #fecb00;
+        height: 100%;
+    }
+    .profile-icon {
+        width: 80px; height: 80px; background: #fff8e1; color: #fecb00;
+        border-radius: 50%; margin: 0 auto 20px; display: flex;
+        align-items: center; justify-content: center; font-size: 2rem;
+    }
+    
+    .assign-card {
+        background: #fff; border-radius: 20px; padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        border-top: 6px solid #006837; margin-bottom: 30px;
+    }
+    
+    .history-card {
+        background: #fff; border-radius: 20px; padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .clean-input, .clean-select { 
+        background-color: #fcfcfc; border: 2px solid #f0f0f0; 
+        border-radius: 12px; padding: 12px; width: 100%; 
+        font-size: 0.9rem;
+    }
+    .clean-input:focus, .clean-select:focus { border-color: #006837; outline: none; }
+    
+    .btn-assign {
+        background: #006837; color: white; border-radius: 50px;
+        padding: 12px; width: 100%; font-weight: 700; border: none;
+        transition: 0.3s;
+    }
+    .btn-assign:hover { background: #004d29; box-shadow: 0 5px 15px rgba(0,104,55,0.2); }
+
+    .table-custom th { border: none; text-transform: uppercase; font-size: 0.75rem; color: #888; padding-bottom: 15px; }
+    .table-custom td { border-bottom: 1px solid #f0f0f0; padding: 15px 5px; vertical-align: middle; }
+    .table-custom tr:last-child td { border: none; }
+</style>
+
+<div class="admin-bg">
+    <div class="container">
+        <a href="{% url 'admin_vendors_list' %}" class="text-decoration-none text-muted fw-bold mb-4 d-inline-block hover-green">
+            <i class="fas fa-arrow-left me-2"></i> Back to Vendors
+        </a>
+
+        <div class="row g-4">
+            <!-- LEFT: Vendor Profile -->
+            <div class="col-lg-4">
+                <div class="profile-card">
+                    <div class="profile-icon"><i class="fas fa-store"></i></div>
+                    <h3 class="fw-bold mb-1">{{ vendor.name }}</h3>
+                    <span class="badge bg-light text-dark mb-4">{{ vendor.joined_at|date:"M Y" }}</span>
+                    
+                    <div class="text-start mt-2">
+                        <p class="text-muted mb-2 small"><i class="fas fa-phone me-2 text-success"></i> {{ vendor.phone }}</p>
+                        <p class="text-muted mb-4 small"><i class="fas fa-map-marker-alt me-2 text-danger"></i> {{ vendor.address|default:"No address provided" }}</p>
+                    </div>
+
+                    <div class="bg-light p-3 rounded-3 mt-3">
+                        <small class="text-muted d-block text-uppercase fw-bold mb-1">Total Stock Purchased</small>
+                        <h2 class="text-success fw-bold m-0">{{ vendor.total_products_bought }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Actions & History -->
+            <div class="col-lg-8">
+                
+                <!-- Assignment Form -->
+                <div class="assign-card">
+                    <h5 class="fw-bold mb-4 text-dark"><i class="fas fa-box-open me-2 text-success"></i> Assign Products (B2B)</h5>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-5">
+                                <label class="small fw-bold text-muted mb-1">Select Product</label>
+                                <select name="product_id" class="form-select clean-select" required>
+                                    <option value="" selected disabled>Choose Product...</option>
+                                    {% for p in products %}
+                                        <option value="{{ p.id }}">{{ p.name }} (Stock: {{ p.stock }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="small fw-bold text-muted mb-1">Qty</label>
+                                <input type="number" name="quantity" class="form-control clean-input" min="1" placeholder="0" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="small fw-bold text-muted mb-1">Disc %</label>
+                                <input type="number" name="vendor_discount" class="form-control clean-input" value="0" min="0" placeholder="%">
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn-assign">Assign</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- History Table -->
+                <div class="history-card">
+                    <h5 class="fw-bold mb-4 text-dark">Transaction History</h5>
+                    <div class="table-responsive">
+                        <table class="table table-custom mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th class="text-center">Quantity</th>
+                                    <th class="text-center">Discount Given</th>
+                                    <th class="text-end">Total Amount</th>
+                                    <th class="text-end">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tx in vendor.transactions.all reversed %}
+                                <tr>
+                                    <td class="fw-bold text-dark">{{ tx.product.name }}</td>
+                                    <td class="text-center"><span class="badge bg-light text-dark border">{{ tx.quantity }}</span></td>
+                                    <td class="text-center text-success fw-bold">{{ tx.vendor_discount_percentage }}%</td>
+                                    <td class="text-end fw-bold">Rs. {{ tx.total_amount|floatformat:0 }}</td>
+                                    <td class="text-end text-muted small">{{ tx.date|date:"d M, Y" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        No transactions found for this vendor yet.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

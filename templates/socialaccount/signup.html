@@ -1,0 +1,121 @@
+{% extends "store/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<style>
+    .auth-container {
+        min-height: 90vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+        padding: 20px;
+    }
+
+    .signup-card {
+        background: #fff;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+        max-width: 500px;
+        width: 100%;
+        padding: 40px;
+        border-top: 5px solid #006837; /* Green Top Border */
+    }
+
+    .clean-input {
+        background-color: #fcfcfc;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 14px 18px;
+        font-size: 0.95rem;
+        transition: 0.3s;
+        width: 100%;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    
+    .clean-input:focus {
+        background-color: #fff;
+        border-color: #006837;
+        box-shadow: 0 0 0 4px rgba(0, 104, 55, 0.1);
+        outline: none;
+    }
+
+    .form-label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #666;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .btn-finish {
+        background: linear-gradient(135deg, #006837 0%, #004d29 100%);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 50px;
+        width: 100%;
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-top: 20px;
+        transition: 0.3s;
+    }
+    .btn-finish:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 104, 55, 0.3);
+        color: white;
+    }
+    
+    /* Hide help text to keep it clean */
+    .helptext { display: none; }
+    ul.errorlist { list-style: none; padding: 0; color: #dc3545; font-size: 0.85rem; margin-bottom: 10px; }
+</style>
+
+<div class="auth-container">
+    <div class="signup-card">
+        
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-dark">Finish Setup</h2>
+            <p class="text-muted small">
+                {% blocktrans with provider_name=account.get_provider.name site_name=site.name %}
+                You are about to use your <strong>{{ provider_name }}</strong> account to login to {{ site_name }}. As a final step, please confirm your details below:
+                {% endblocktrans %}
+            </p>
+        </div>
+
+        <form class="signup" id="signup_form" method="post" action="{% url 'socialaccount_signup' %}">
+            {% csrf_token %}
+            
+            <!-- Loop through form fields to style them -->
+            {% for field in form %}
+            <div class="mb-3">
+                <label class="form-label">{{ field.label }}</label>
+                
+                <!-- Manually render input with custom class -->
+                <input type="{{ field.field.widget.input_type }}" 
+                       name="{{ field.name }}" 
+                       value="{{ field.value|default:'' }}" 
+                       class="clean-input"
+                       {% if field.field.required %}required{% endif %}>
+                
+                {% if field.errors %}
+                    <div class="text-danger small mt-1">{{ field.errors.0 }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+            {% endif %}
+
+            <button type="submit" class="btn-finish">
+                {% trans "Create Account" %} &rarr;
+            </button>
+        </form>
+
+    </div>
+</div>
+{% endblock %}

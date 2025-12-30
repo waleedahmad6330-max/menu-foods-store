@@ -1,0 +1,203 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<style>
+    .admin-form-container { background: #f8f9fa; min-height: 90vh; padding: 60px 0; }
+    
+    .form-card { 
+        background: #fff; 
+        border-radius: 24px; 
+        box-shadow: 0 20px 50px rgba(0,0,0,0.08); 
+        padding: 40px; 
+        max-width: 550px; 
+        margin: 0 auto; 
+        position: relative;
+        overflow: hidden; 
+    }
+
+    .top-accent {
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 8px;
+        background: #006837;
+        border-radius: 24px 24px 0 0;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 35px;
+        position: relative;
+        margin-top: 10px;
+    }
+    .form-header h3 {
+        font-weight: 800;
+        color: #006837;
+        letter-spacing: -0.5px;
+    }
+    .form-header::after {
+        content: '';
+        display: block;
+        width: 70px;
+        height: 5px;
+        background: #fecb00; 
+        margin: 12px auto 0;
+        border-radius: 50px;
+    }
+
+    .clean-input { 
+        background-color: #fff; 
+        border: 2px solid #f4f4f4; 
+        border-radius: 15px; 
+        padding: 15px; 
+        width: 100%; 
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        color: #333;
+    }
+    .clean-input:focus { 
+        border-color: #006837; 
+        box-shadow: 0 5px 15px rgba(0, 104, 55, 0.08); 
+        outline: none; 
+    }
+
+    /* CUSTOM ROUNDED CONTAINER FOR SELECT BOX */
+    .rounded-select-container {
+        border: 2px solid #f4f4f4;
+        border-radius: 15px; /* Rounded Edges for the whole box */
+        padding: 10px;
+        background: #fff;
+        overflow: hidden;
+    }
+    
+    /* STYLE THE SELECT BOX ITSELF */
+    .clean-select {
+        border: none;
+        width: 100%;
+        background: transparent;
+        outline: none;
+    }
+    .clean-select:focus { outline: none; }
+
+    /* STYLE OPTGROUPS TO LOOK ROUNDED (Limited Browser Support, requires wrapper for full effect) */
+    optgroup {
+        font-weight: 800;
+        font-style: normal;
+        color: #006837;
+        background: #e8f5e9; /* Light Green Background */
+        border-radius: 10px; /* Attempt to round in modern browsers */
+        margin: 5px 0;
+    }
+    option {
+        background: #fff;
+        color: #333;
+        padding: 8px;
+        margin: 2px 0;
+    }
+
+    .label-custom {
+        font-weight: 700;
+        font-size: 0.75rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .btn-add { 
+        background: linear-gradient(135deg, #fecb00, #e5b700);
+        color: #000; 
+        border: none; 
+        padding: 16px; 
+        border-radius: 50px; 
+        width: 100%; 
+        font-weight: 800; 
+        margin-top: 30px; 
+        transition: 0.3s; 
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 10px 20px rgba(254, 203, 0, 0.2);
+    }
+    .btn-add:hover { 
+        transform: translateY(-3px); 
+        box-shadow: 0 15px 30px rgba(254, 203, 0, 0.3); 
+    }
+
+    .multi-select-box { height: 200px; }
+    
+    .divider-line {
+        border-top: 2px dashed #f0f0f0;
+        margin: 30px 0;
+    }
+</style>
+
+<div class="admin-form-container">
+    <div class="container">
+        <a href="{% url 'admin_dashboard' %}" class="text-decoration-none text-muted fw-bold mb-4 d-inline-block hover-green">
+            <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+        </a>
+
+        <div class="form-card">
+            <div class="top-accent"></div>
+
+            <div class="form-header">
+                <div style="width: 60px; height: 60px; background: #e8f5e9; color: #006837; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; box-shadow: 0 5px 15px rgba(0,104,55,0.1);">
+                    <i class="fas fa-plus fa-lg"></i>
+                </div>
+                <h3>New Category</h3>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="mb-4">
+                    <label class="label-custom">Category Name</label>
+                    <input type="text" name="name" class="form-control clean-input" placeholder="e.g. Skin Care" required>
+                </div>
+                
+                <div class="divider-line"></div>
+
+                <div class="mb-4">
+                    <label class="label-custom">Parent Categories <span class="text-muted fw-normal text-lowercase">(optional)</span></label>
+                    
+                    <!-- Rounded Wrapper for Select Box -->
+                    <div class="rounded-select-container">
+                        <select name="parents" class="form-control clean-select multi-select-box" multiple>
+                            <optgroup label="Root Categories (Main)">
+                                {% for cat in categories %}
+                                    {% if not cat.parents.exists %}
+                                        <option value="{{ cat.id }}">&#9679; {{ cat.name }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </optgroup>
+                            
+                            <!-- Spacer option for visual separation -->
+                            <option disabled style="height: 5px; background: transparent;"></option>
+
+                            <optgroup label="Sub Categories (Nested)">
+                                {% for cat in categories %}
+                                    {% if cat.parents.exists %}
+                                        <option value="{{ cat.id }}">&nbsp;&nbsp;- {{ cat.name }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </optgroup>
+                        </select>
+                    </div>
+                    
+                    <div class="d-flex align-items-center mt-2 text-muted">
+                        <i class="fas fa-info-circle me-1 small"></i>
+                        <small style="font-size: 0.75rem;">Hold <strong>Ctrl</strong> (Win) or <strong>Cmd</strong> (Mac) to select multiple.</small>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="label-custom">Cover Image</label>
+                    <input type="file" name="image" class="form-control clean-input" style="padding: 12px;">
+                </div>
+
+                <button type="submit" class="btn-add">Create Category</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
